@@ -112,17 +112,21 @@ func TestProcessSafe_DeterministicWithRace(t *testing.T) {
 
 // TestNaiveRace demonstrates the race condition in ProcessNaive.
 //
-// Run WITHOUT race detector first — it may or may not panic:
+// This test is skipped by default (go test ./...) because ProcessNaive can crash
+// with "fatal error: concurrent map writes" — which is not recoverable and would
+// abort the entire test run. That crash IS the race condition in action.
 //
-//	go test -run TestNaiveRace ./internal/processor/
+// Run explicitly for the Bloco 19 demo:
 //
-// Then run WITH the race detector to reliably catch it:
-//
-//	go test -race -run TestNaiveRace ./internal/processor/
-//
-// The race detector will print the conflicting goroutine stack traces.
+//	go test -run TestNaiveRace ./internal/processor/        # may or may not crash
+//	go test -race -run TestNaiveRace ./internal/processor/  # race detector fires
 func TestNaiveRace(t *testing.T) {
-	t.Skip("TestNaiveRace should be run explicitly: go test -race -run TestNaiveRace ./internal/processor/")
+	if testing.Short() {
+		t.Skip("skipping race condition test in -short mode; run explicitly for Bloco 19 demo")
+	}
+
+	entries := makeEntries(10000)
+	_ = processor.ProcessNaive(entries)
 }
 
 // ─── benchmarks ───────────────────────────────────────────────────────────────

@@ -218,11 +218,11 @@ go vet ./...
 > _"Silêncio. O projeto está limpo. Agora o `go test` vai passar:"_
 
 ```bash
-go test ./...
+go test -short ./...
 go test -v ./internal/parser/
 ```
 
-> _"Todos os testes passando. O que falhou no Bloco 3 agora funciona — porque resolvemos o que o `go vet` apontou."_
+> _"Todos os testes passando. O que falhou no Bloco 3 agora funciona — porque resolvemos o que o `go vet` apontou. O flag `-short` pula testes que crasham propositalmente — veremos um deles no Bloco 19."_
 
 ---
 
@@ -300,13 +300,13 @@ go mod why github.com/fatih/color
 > _"Os testes passam. Mas quanto do código está sendo testado?"_
 
 ```bash
-go test -cover ./internal/...
+go test -short -cover ./internal/...
 ```
 
 > _"Tem o percentual de cobertura. Mas onde estão as linhas descobertas? Para saber, precisa de um perfil:"_
 
 ```bash
-go test -coverprofile=coverage.out ./internal/...
+go test -short -coverprofile=coverage.out ./internal/...
 go tool cover -func=coverage.out
 ```
 
@@ -339,7 +339,7 @@ cat go.mod
 du -sh $(go env GOCACHE)
 du -sh $(go env GOMODCACHE)
 go clean -testcache
-go test ./internal/...
+go test -short ./internal/...
 ```
 
 > _"Com `-testcache` limpo, todos os testes rodam de novo — mesmo sem mudança de código. Útil quando você suspeita que um resultado está sendo servido do cache."_
@@ -530,7 +530,7 @@ go test -shuffle=on -v ./internal/parser/
 > _"Ordem dos testes aleatorizada. Se um teste só passa quando roda depois de outro — dependência de estado — `-shuffle=on` vai expor isso. `go help testflag` documenta o flag."_
 
 ```bash
-go test -count=3 ./internal/...
+go test -short -count=3 ./internal/...
 ```
 
 > _"Roda a suíte 3 vezes seguidas. Útil para testes flaky. `-count=1` é a forma idiomática de desabilitar o cache sem limpar o `testcache`."_
