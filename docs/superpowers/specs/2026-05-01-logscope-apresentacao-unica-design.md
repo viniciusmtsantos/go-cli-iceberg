@@ -73,7 +73,7 @@ Os bugs são introduzidos apenas em tempo de apresentação pelo `reset.sh`:
 | 13 | `go test -cover`, `go tool cover -func`, `go tool cover -html` | Cobertura de testes |
 | 14 | `go clean -testcache`, `go clean -cache`, `go clean -modcache` | Gestão cirúrgica do cache |
 
-### ⚙️ Camada 3 — Geração e build avançado (novos blocos)
+### ⚙️ Camada 3 — Build avançado e geração (novos blocos)
 
 | Bloco | Comando(s) | O que demonstra |
 |-------|-----------|-----------------|
@@ -81,7 +81,7 @@ Os bugs são introduzidos apenas em tempo de apresentação pelo `reset.sh`:
 | 16 | `go build -tags json`, `go build -ldflags "-X main.version=..."` | Build tags + injeção de variáveis em tempo de build |
 | 17 | `GOOS=windows go build -o logscope.exe`, `go build -trimpath` | Cross-compilation + builds reproduzíveis |
 
-### 🧪 Camada 4 — Testing profundo (novos blocos)
+### 🔬 Camada 4 — Testing profundo e observabilidade (novos blocos)
 
 | Bloco | Comando(s) | O que demonstra |
 |-------|-----------|-----------------|
@@ -89,11 +89,6 @@ Os bugs são introduzidos apenas em tempo de apresentação pelo `reset.sh`:
 | 19 | `go test -race ./...` com `-naive` | Detector de corridas de dados |
 | 20 | `go test -fuzz=FuzzParseReader` | Fuzzing com entradas aleatórias |
 | 21 | `go test -shuffle=on`, `go test -count=3` | Ordem aleatória de testes + bypass de cache |
-
-### 📊 Camada 5 — Observabilidade
-
-| Bloco | Comando(s) | O que demonstra |
-|-------|-----------|-----------------|
 | 22 | `logscope -cpuprofile cpu.prof`, `go tool pprof -http=:8080 cpu.prof` | Profiling de CPU |
 | 23 | `logscope -trace trace.out`, `go tool trace trace.out` | Tracing de execução |
 | 24 | `go tool nm ./logscope \| head -20` | Inspeção de símbolos do binário |
