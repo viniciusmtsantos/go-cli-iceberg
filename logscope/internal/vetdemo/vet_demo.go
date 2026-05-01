@@ -1,19 +1,11 @@
 // Package vetdemo contains intentional bugs that go vet detects automatically.
 // It exists for the "go vet" section of the presentation.
 //
-// This file is excluded by default during go test ./... but can be included
-// explicitly for go vet analysis with: go vet -tags=govetwarn ./...
-//
 // Demonstrate with:
 //
-//	go vet -tags=govetwarn ./internal/vetdemo/
-//	# or
-//	go vet -tags=govetwarn ./...
+//	go vet ./...
 //
 // After the demo, fix the bugs (see the FIX: comments) and run again.
-//
-// +build govetwarn
-
 package vetdemo
 
 import (
