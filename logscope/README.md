@@ -30,6 +30,7 @@
   - `cmd/logscope/` → entrypoint com flags, profiling e tracing
   - `internal/` → parser, processor (safe + naive), report
   - `pkg/entry/` → tipos compartilhados + código gerado por `go generate`
+- _"A estrutura do projeto segue as convenções do módulo Go — `go help modules` documenta o sistema de módulos."_
 - _"O projeto está aqui. Sem binário, sem artefatos. Vamos resolver isso agora."_
 
 ---
@@ -68,7 +69,7 @@ cat go.sum | head -5
 
 > _"O `go.sum` é o lockfile: hash criptográfico de cada módulo. Ninguém substitui uma dep sem o Go perceber."_
 > _"Olha a diretiva `go` no `go.mod` — ela pode ter subido. Isso não é a versão instalada, é a versão mínima que o grafo de dependências exige."_
-> _"Não vou chamar `go mod tidy` agora — vamos usar essa dep nos próximos blocos."_
+> _"Não vou chamar `go mod tidy` agora — vamos usar essa dep nos próximos blocos. `go help modules` documenta o go.mod."_
 
 ---
 
@@ -82,7 +83,7 @@ go test ./...
 
 > _"Falhou. O `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. E o `go vet` encontrou problemas."_
 > _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
-> _"Camada 2: `go fmt`, depois `go vet`. Quando resolver os dois, o `go test` vai passar."_
+> _"Camada 2: `go fmt`, depois `go vet`. Quando resolver os dois, o `go test` vai passar. `go help test` explica como o `go test` executa o vet internamente."_
 
 ---
 
@@ -155,7 +156,8 @@ $(go env GOPATH)/bin/logscope -version
 go doc fmt.Printf
 ```
 
-> _"Parâmetros, tipos, comportamento. No terminal, offline. Agora no nosso próprio código:"_
+> _"Parâmetros, tipos, comportamento. No terminal, offline. `go help doc` documenta as flags do go doc."_
+> _"Agora no nosso próprio código:"_
 
 ```bash
 go doc ./pkg/entry
@@ -189,7 +191,7 @@ go fmt ./...
 gofmt -l .
 ```
 
-> _"Silêncio. Zero configuração, zero debate — o `go fmt` tem uma opinião e ela é definitiva. Em CI: `gofmt -l . | grep .` retorna exit 1 se qualquer arquivo estiver fora do padrão."_
+> _"Silêncio. Zero configuração, zero debate — o `go fmt` tem uma opinião e ela é definitiva. Em CI: `gofmt -l . | grep .` retorna exit 1 se qualquer arquivo estiver fora do padrão. `go help fmt` documenta as opções."_
 
 ---
 
@@ -205,7 +207,7 @@ go vet ./...
 > _"1. `badCounter.inc()` com receiver por valor — cada chamada copia o `sync.Mutex`, quebrando a sincronização."_
 > _"2. `badFormat` usa `%s` para formatar um `int` — o log vai imprimir lixo em produção."_
 
-> _"`go vet` usa a mesma `go/ast` que o nosso parser usa internamente. Ele inspecionou a árvore sintática e cruzou os tipos dos argumentos com os verbos do format string."_
+> _"`go vet` usa a mesma `go/ast` que o nosso parser usa internamente. Ele inspecionou a árvore sintática e cruzou os tipos dos argumentos com os verbos do format string. `go help vet` lista os analisadores disponíveis."_
 > _"Corrige: receiver `badCounter` → `*badCounter`, `%s` → `%d`."_
 
 ```bash
@@ -249,6 +251,8 @@ cat $(go env GOENV)
 go env -u GOTELEMETRY
 ```
 
+> _"`go help environment` lista todas as variáveis de ambiente do Go."_
+
 ---
 
 ### Bloco 11 — `go list`
@@ -268,7 +272,7 @@ go list -m -u all | grep '\['
 go list -m -u -json all
 ```
 
-> _"O JSON é para automação. Num pipeline de CI: se alguma dep estiver N versões atrás, falha o build."_
+> _"O JSON é para automação. Num pipeline de CI: se alguma dep estiver N versões atrás, falha o build. `go help list` documenta todos os formatos de saída."_
 
 ---
 
@@ -287,7 +291,7 @@ go mod graph | grep sys
 go mod why github.com/fatih/color
 ```
 
-> _"Essencial em projetos grandes — quando aparece uma lib desconhecida no `go.sum`, esse comando te diz quem a trouxe."_
+> _"Essencial em projetos grandes — quando aparece uma lib desconhecida no `go.sum`, esse comando te diz quem a trouxe. `go help mod` documenta todos os subcomandos de módulo."_
 
 ---
 
@@ -312,7 +316,7 @@ go tool cover -func=coverage.out
 go tool cover -html=coverage.out
 ```
 
-> _"`go tool cover` já vem no toolchain — sem instalar nada. Linhas vermelhas = não cobertas. É a forma mais visual de entender o que falta testar."_
+> _"`go tool cover` já vem no toolchain — sem instalar nada. Linhas vermelhas = não cobertas. É a forma mais visual de entender o que falta testar. `go help testflag` e `go help cover` documentam as opções de cobertura."_
 
 ---
 
@@ -352,7 +356,7 @@ go clean -modcache
 du -sh $(go env GOMODCACHE)
 ```
 
-> _"Apagou os módulos baixados. Libera espaço considerável em projetos grandes. Use quando suspeitar de uma dep corrompida ou quiser garantir um build 100% limpo."_
+> _"Apagou os módulos baixados. Libera espaço considerável em projetos grandes. Use quando suspeitar de uma dep corrompida ou quiser garantir um build 100% limpo. `go help clean` documenta todos os flags de limpeza."_
 
 ---
 
@@ -557,7 +561,7 @@ logscope -input access.log -memprofile mem.prof
 go tool pprof -http=:8081 mem.prof
 ```
 
-> _"Heap profile capturado após o GC — mostra onde o logscope aloca memória."_
+> _"Heap profile capturado após o GC — mostra onde o logscope aloca memória. `go help tool` lista todos os sub-tools disponíveis."_
 
 ---
 
@@ -570,7 +574,7 @@ logscope -input access.log -trace trace.out
 go tool trace trace.out
 ```
 
-> _"Você vê goroutines nascendo e morrendo, o scheduler do Go distribuindo trabalho entre os cores, o GC pausando tudo. Nenhuma lib externa — está no toolchain."_
+> _"Você vê goroutines nascendo e morrendo, o scheduler do Go distribuindo trabalho entre os cores, o GC pausando tudo. Nenhuma lib externa — está no toolchain. `go help tool` documenta o trace."_
 
 ---
 
