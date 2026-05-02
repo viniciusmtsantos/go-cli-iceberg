@@ -82,8 +82,9 @@ cat go.sum | head -5
 go test -short ./...
 ```
 
-> _"Passou. Mas isso não significa que o projeto está limpo — o `go test` só veta os pacotes que têm arquivos de teste. Tem um bug no código que o `go test` nem viu."_
-> _"Camada 2: primeiro `go fmt`, depois `go vet`. O `go vet` vai encontrar o que o `go test` deixou passar. `go help test` explica como o `go test` executa o vet internamente."_
+> _"Falhou. O `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. E o `go vet` encontrou um bug em `internal/report/report.go`: `%s` para formatar um `int`."_
+> _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
+> _"Camada 2: primeiro `go fmt`, depois `go vet`. Quando resolver os dois, o `go test` vai passar. `go help test` explica como o `go test` executa o vet internamente. O `-short` pula testes que crasham propositalmente — veremos no Bloco 19."_
 
 ---
 
@@ -99,7 +100,7 @@ go run ./cmd/logscope -input testdata/access.log
 > _"`go run` executa direto na memória, sem gerar binário. Agora uma flag pouco conhecida — está em `go help run`:"_
 
 ```bash
-go run golang.org/x/vuln/cmd/govulncheck@latest .
+go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ```
 
 > _"O Go ignora o `go.mod` atual e roda em modo isolado. Ferramenta externa sem contaminar suas dependências."_
@@ -197,14 +198,14 @@ gofmt -l .
 
 ### Bloco 9 — `go vet`
 
-> _"Formatação resolvida. Mas o projeto ainda tem um bug. Não é de sintaxe — o compilador não detecta. Vamos chamar o caçador:"_
+> _"Formatação resolvida. Mas o projeto ainda tem um bug que o `go fmt` não vê. Vamos chamar o caçador:"_
 
 ```bash
 go vet ./...
 ```
 
-> _"Bug em `internal/report/report.go`: a linha `Entries analyzed` usa `%s` para formatar `stats.Total`, que é um `int`. O log vai imprimir lixo em produção — e nem o compilador, nem o `go test` viram isso."_
-> _"Por quê o `go test` não pegou? O `report` não tem arquivos de teste — `go test ./...` não veta pacotes sem testes. O `go vet ./...` varre tudo."_
+> _"Bug em `internal/report/report.go`: a linha `Entries analyzed` usa `%s` para formatar `stats.Total`, que é um `int`. O log vai imprimir `%!s(int=1234)` em produção — exatamente o que vimos no Bloco 3."_
+> _"É o mesmo bug que `go test` detectou no Bloco 3 — mas agora estamos investigando de propósito."_
 
 > _"`go vet` usa a mesma `go/ast` que o compilador usa internamente. Ele inspecionou a árvore sintática e cruzou os tipos dos argumentos com os verbos do format string. `go help vet` lista os analisadores disponíveis."_
 > _"Corrige: `%s` → `%d` na linha `Entries analyzed`."_
@@ -214,7 +215,7 @@ go vet ./...
 go vet ./...
 ```
 
-> _"Silêncio. O projeto está limpo. E o `go test` já passava desde o Bloco 3 — porque o bug estava num pacote sem testes:"_
+> _"Silêncio. O projeto está limpo. Agora o `go test` vai passar:"_
 
 ```bash
 go test -short ./...
@@ -239,7 +240,7 @@ go env -json GOPATH GOCACHE GOMODCACHE
 > _"Mas tem um superpoder aqui que quase ninguém conhece:"_
 
 ```bash
-go env -w GOTELEMETRY=off
+go env -w GOFLAGS=-trimpath
 go env GOENV
 cat $(go env GOENV)
 ```
@@ -247,7 +248,7 @@ cat $(go env GOENV)
 > _"`go env -w` escreveu numa config global do Go — persiste entre projetos, terminais e reboots. Sem `.bashrc`, sem `.zshrc`, sem configurar de novo no próximo setup."_
 
 ```bash
-go env -u GOTELEMETRY
+go env -u GOFLAGS
 ```
 
 > _"`go help environment` lista todas as variáveis de ambiente do Go."_
@@ -280,17 +281,16 @@ go list -m -u -json all
 > _"O `go list` mostrou `golang.org/x/sys` na lista. Você não adicionou essa dep. De onde ela veio?"_
 
 ```bash
+go mod graph | grep sys
+```
+
+> _"O `go mod graph` mostra o grafo completo: `logscope` → `golang.org/x/sys` e a cadeia toda: `fatih/color` → `go-isatty` → `golang.org/x/sys`. Quando aparece uma lib desconhecida no `go.sum`, esse é o caminho de investigação."_
+
+```bash
 go mod why golang.org/x/sys
 ```
 
-> _"Imprimiu o caminho mais curto no grafo: `logscope` → `fatih/color` → `go-isatty` → `golang.org/x/sys`. Quatro saltos. Você vê a rota inteira."_
-
-```bash
-go mod graph | grep sys
-go mod why github.com/fatih/color
-```
-
-> _"Essencial em projetos grandes — quando aparece uma lib desconhecida no `go.sum`, esse comando te diz quem a trouxe. `go help mod` documenta todos os subcomandos de módulo."_
+> _"Diz que a main module não precisa — porque nenhum `import` do nosso código usa `golang.org/x/sys` diretamente. Mas ela está no `go.mod`. Por quê? Porque adicionamos `fatih/color` com `go get` mas não usamos no código. O `go mod tidy` vai limpar isso no Bloco 14. `go help mod` documenta todos os subcomandos de módulo."_
 
 ---
 
@@ -467,7 +467,7 @@ go test -bench=. -benchmem ./internal/parser/
 > _"Agora comparando workers no processor:"_
 
 ```bash
-go test -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
+go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
 ```
 
 > _"ProcessSafe com 1 worker vs 8 workers — você vê o speedup à medida que adicionamos goroutines. `go help testflag` documenta todas as flags de benchmark."_
