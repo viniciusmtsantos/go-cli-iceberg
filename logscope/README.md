@@ -79,12 +79,21 @@ cat go.sum | head -5
 > _"Módulo configurado. Antes de rodar qualquer coisa, quero saber se o código está de pé."_
 
 ```bash
+go test ./...
+```
+
+> _"O que você espera? Testes passam ou falham? Bem, o `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. Neste caso, falha porque há um bug detectado: `internal/report/report.go:30` — `%s` tentando formatar um `int`."_
+
+> _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
+
+> _"Aqui tem um detalhe: no Bloco 19, vamos ter um teste (`TestNaiveRace`) que **crash propositalmente** quando roda sem `-race`. Se rodarmos `go test ./...` agora sem proteção, ele bate nesse teste e morre. Por isso usamos `-short` — é um flag que os testes podem consultar para pular comportamentos destrutivos durante development. Vamos ver isso funcionando:"_
+
+```bash
 go test -short ./...
 ```
 
-> _"Falhou. O `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. E o `go vet` encontrou um bug em `internal/report/report.go`: `%s` para formatar um `int`."_
-> _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
-> _"Camada 2: primeiro `go fmt`, depois `go vet`. Quando resolver os dois, o `go test` vai passar. `go help test` explica como o `go test` executa o vet internamente. O `-short` pula testes que crasham propositalmente — veremos no Bloco 19."_
+> _"Agora passa o `-short`: o TestNaiveRace pula, mas **o `go vet` ainda roda** — e aquele bug em `report.go` ainda aparece. Esse é o ponto: `go vet` é independente do `-short`."_
+> _"Camada 2: primeiro `go fmt`, depois `go vet` manual. Quando resolver os dois bugs intencionais, o `go test -short ./...` vai passar silenciosamente. `go help test` explica como o `go test` executa o vet internamente. `go help testflag` documenta `-short` e `-run`."_
 
 ---
 
