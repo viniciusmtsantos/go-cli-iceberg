@@ -104,7 +104,7 @@ cat go.sum | head -5
 go test ./...
 ```
 
-> _"O que você espera? Testes passam ou falham? Bem, o `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. Neste caso, falha porque há um bug detectado: `internal/report/report.go:30` — `%s` tentando formatar um `int`."_
+> _"O que você espera? Testes passam ou falham? Bem, o `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. O go vet faz uma análise estática do código para detectar problemas comuns. Neste caso, falha porque há um bug detectado: `internal/report/report.go:30` — `%s` tentando formatar um `int`."_
 
 > _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
 
@@ -119,22 +119,25 @@ go test -short ./...
 
 ---
 
-### Bloco 4 — `go run`
+### Bloco 4 — `go run` (executar sem compilar)
 
-> _"Os testes detectaram problemas, mas o código ainda compila e roda. Vamos confirmar."_
+> _"Os testes detectaram problemas, mas o código ainda **compila e roda**. Não é um erro fatal — é um aviso. Vamos testar o programa na prática antes de corrigir."_
 
 ```bash
 go run ./cmd/logscope -gen -lines 1000 -output testdata/access.log
 go run ./cmd/logscope -input testdata/access.log
 ```
 
-> _"`go run` executa direto na memória, sem gerar binário. Agora uma flag pouco conhecida — está em `go help run`:"_
+> _"`go run` compila e executa na memória — sem deixar um binário no disco. Primeiro comando: gera 1000 linhas de log de teste e salva em `testdata/access.log`. Segundo: lê esse arquivo e mostra o relatório."_
+> _"O programa funciona normalmente. A saída mostra `Entries analyzed: %!s(int=1000)` — essa bagunça é o bug de format string que vimos no Bloco 3 em ação. Em produção, isso corromperia o log."_
+
+> _"Agora vamos verificar vulnerabilidades conhecidas nas dependências:"_
 
 ```bash
 go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ```
 
-> _"O Go ignora o `go.mod` atual e roda em modo isolado. Ferramenta externa sem contaminar suas dependências."_
+> _"Dois pontos importantes aqui: (1) `go run` com módulo externo — o Go baixa, compila e executa em um ambiente isolado, sem afetar seu `go.mod`. (2) O comando varre todas as suas dependências procurando por CVEs públicas. Se encontrasse algo grave, falharia com exit code 1 — bloquearia o build em CI. Aqui, sem vulnerabilidades no seu código."_
 
 ---
 
