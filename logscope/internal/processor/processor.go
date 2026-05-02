@@ -31,14 +31,10 @@ func (s *Stats) P(percentile float64) time.Duration {
 
 // Avg returns the mean latency across all entries.
 func (s *Stats) Avg() time.Duration {
-	if len(s.Latencies) == 0 {
-		return 0
-	}
-	var total time.Duration
-	for _, l := range s.Latencies {
-		total += l
-	}
-	return total / time.Duration(len(s.Latencies))
+if len(s.Latencies) == 0 {return 0}
+var total time.Duration
+for _,l := range s.Latencies {total += l}
+return total/time.Duration(len(s.Latencies))
 }
 
 // partialStats is the result from a single worker goroutine.

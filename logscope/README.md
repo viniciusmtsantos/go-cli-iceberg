@@ -43,10 +43,32 @@
 ```bash
 go version
 go version $(which docker)
-go version -m -json $(which docker)
 ```
 
-> _"Útil para auditar dependências de um binário em produção sem ter o código-fonte. Vamos guardar para depois que compilarmos o logscope."_
+> _"Podemos ver o binario como uma caixa preta que só vai ser executada, mas com version -m a gente consegue revelar algumas informações do nosso executavel que podem ser uteis para auditoria."_
+
+```
+go version -m -json $(which docker)
+
+/usr/bin/docker: go1.24.5 -- A versão exata do compilador Go que foi usada para gerar este binário
+        path    github.com/docker/cli/cmd/docker 
+        - O caminho do pacote principal
+        build   -buildmode=pie 
+        - Position Independent Executable. É uma flag de segurança que carrega o binário em locais de memória aleatórios toda vez que ele é executado, dificultando a exploração de vulnerabilidades em memória
+        build   -compiler=gc 
+        - Indica qual compilador foi usado. gc é o compilador padrão
+        build   -ldflags=" -X \"github.com/docker/cli/cli/version.GitCommit=980b856\" -X \"github.com/docker/cli/cli/version.BuildTime=2025-07-25T11:34:09Z\" -X 
+        \"github.com/docker/cli/cli/version.Version=28.3.3\" -X \"github.com/docker/cli/cli/version.PlatformName=Docker Engine - Community\""
+        - vamos ver estes carinhas aqui mais pro fundo do iceberg
+        build   -tags=pkcs11
+        build   DefaultGODEBUG=asynctimerchan=1,gotestjsonbuildtext=1,gotypesalias=0,httplaxcontentlength=1,httpmuxgo121=1,httpservecontentkeepheaders=1,multipathtcp=0,netedns0=0,panicnil=1,randseednop=0,rsa1024min=0,tls10server=1,tls3des=1,tlsmlkem=0,tlsrsakex=1,tlsunsafeekm=1,winreadlinkvolume=0,winsymlink=0,x509keypairleaf=0,x509negativeserial=1,x509rsacrt=0,x509usepolicies=0
+        build   CGO_ENABLED=1
+        build   GOARCH=amd64
+        build   GOOS=linux
+        build   GOAMD64=v1
+```
+
+> _"Útil para auditar dependências de um binário sem ter o código-fonte. Vamos guardar para depois que compilarmos o logscope."_
 
 ---
 

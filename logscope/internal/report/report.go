@@ -27,7 +27,7 @@ func Write(w io.Writer, stats *processor.Stats) {
 	fmt.Fprintln(tw, sep)
 	fmt.Fprintln(tw)
 
-	fmt.Fprintf(tw, "  Entries analyzed:\t%d\n", stats.Total)
+	fmt.Fprintf(tw, "  Entries analyzed:\t%s\n", stats.Total)
 	fmt.Fprintf(tw, "  Total traffic:\t%s\n", formatBytes(stats.TotalBytes))
 	fmt.Fprintln(tw)
 
