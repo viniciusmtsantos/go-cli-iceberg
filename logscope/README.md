@@ -42,6 +42,7 @@
 
 ```bash
 go version
+go version $(which docker)
 go version -m -json $(which docker)
 ```
 
@@ -78,12 +79,11 @@ cat go.sum | head -5
 > _"Módulo configurado. Antes de rodar qualquer coisa, quero saber se o código está de pé."_
 
 ```bash
-go test ./...
+go test -short ./...
 ```
 
-> _"Falhou. O `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. E o `go vet` encontrou problemas."_
-> _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
-> _"Camada 2: `go fmt`, depois `go vet`. Quando resolver os dois, o `go test` vai passar. `go help test` explica como o `go test` executa o vet internamente."_
+> _"Passou. Mas isso não significa que o projeto está limpo — o `go test` só veta os pacotes que têm arquivos de teste. Tem um bug no código que o `go test` nem viu."_
+> _"Camada 2: primeiro `go fmt`, depois `go vet`. O `go vet` vai encontrar o que o `go test` deixou passar. `go help test` explica como o `go test` executa o vet internamente."_
 
 ---
 
@@ -92,8 +92,8 @@ go test ./...
 > _"Os testes detectaram problemas, mas o código ainda compila e roda. Vamos confirmar."_
 
 ```bash
-go run ./cmd/logscope -gen -lines 1000 -output access.log
-go run ./cmd/logscope -input access.log
+go run ./cmd/logscope -gen -lines 1000 -output testdata/access.log
+go run ./cmd/logscope -input testdata/access.log
 ```
 
 > _"`go run` executa direto na memória, sem gerar binário. Agora uma flag pouco conhecida — está em `go help run`:"_
@@ -197,32 +197,31 @@ gofmt -l .
 
 ### Bloco 9 — `go vet`
 
-> _"Formatação resolvida. Mas o projeto ainda tem bugs. Não são de sintaxe — o compilador não detecta. Vamos chamar o caçador:"_
+> _"Formatação resolvida. Mas o projeto ainda tem um bug. Não é de sintaxe — o compilador não detecta. Vamos chamar o caçador:"_
 
 ```bash
 go vet ./...
 ```
 
-> _"Dois bugs em `vet_demo.go`:"_
-> _"1. `badCounter.inc()` com receiver por valor — cada chamada copia o `sync.Mutex`, quebrando a sincronização."_
-> _"2. `badFormat` usa `%s` para formatar um `int` — o log vai imprimir lixo em produção."_
+> _"Bug em `internal/report/report.go`: a linha `Entries analyzed` usa `%s` para formatar `stats.Total`, que é um `int`. O log vai imprimir lixo em produção — e nem o compilador, nem o `go test` viram isso."_
+> _"Por quê o `go test` não pegou? O `report` não tem arquivos de teste — `go test ./...` não veta pacotes sem testes. O `go vet ./...` varre tudo."_
 
-> _"`go vet` usa a mesma `go/ast` que o nosso parser usa internamente. Ele inspecionou a árvore sintática e cruzou os tipos dos argumentos com os verbos do format string. `go help vet` lista os analisadores disponíveis."_
-> _"Corrige: receiver `badCounter` → `*badCounter`, `%s` → `%d`."_
+> _"`go vet` usa a mesma `go/ast` que o compilador usa internamente. Ele inspecionou a árvore sintática e cruzou os tipos dos argumentos com os verbos do format string. `go help vet` lista os analisadores disponíveis."_
+> _"Corrige: `%s` → `%d` na linha `Entries analyzed`."_
 
 ```bash
-# edita internal/vetdemo/vet_demo.go: linha do receiver (badCounter → *badCounter) e linha do Sprintf (%s → %d)
+# edita internal/report/report.go: troca %s por %d em fmt.Fprintf(tw, "  Entries analyzed:..."
 go vet ./...
 ```
 
-> _"Silêncio. O projeto está limpo. Agora o `go test` vai passar:"_
+> _"Silêncio. O projeto está limpo. E o `go test` já passava desde o Bloco 3 — porque o bug estava num pacote sem testes:"_
 
 ```bash
 go test -short ./...
 go test -v ./internal/parser/
 ```
 
-> _"Todos os testes passando. O que falhou no Bloco 3 agora funciona — porque resolvemos o que o `go vet` apontou. O flag `-short` pula testes que crasham propositalmente — veremos um deles no Bloco 19."_
+> _"Todos os testes passando. O flag `-short` pula testes que crasham propositalmente — veremos um deles no Bloco 19."_
 
 ---
 

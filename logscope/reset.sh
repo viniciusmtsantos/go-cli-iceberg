@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # reset.sh — restaura o logscope ao estado inicial para treino da apresentação.
-# Introduz propositalmente: (1) formatação quebrada em processor.go e (2) bugs de vet em vet_demo.go.
+# Introduz propositalmente: (1) formatação quebrada em processor.go e (2) bug de vet em report.go.
 set -euo pipefail
 
 echo "[reset] removendo binários e arquivos gerados..."
@@ -20,8 +20,23 @@ go 1.25.0
 EOF
 rm -f go.sum
 
-echo "[reset] restaurando vet_demo.go ao estado com bugs intencionais..."
-git checkout HEAD -- internal/vetdemo/vet_demo.go
+echo "[reset] restaurando arquivos de código ao estado limpo do git..."
+REPO_ROOT=$(git rev-parse --show-toplevel)
+git -C "$REPO_ROOT" checkout HEAD -- logscope/internal/processor/processor.go
+git -C "$REPO_ROOT" checkout HEAD -- logscope/internal/report/report.go
+
+echo "[reset] introduzindo bug de vet em report.go (Entries analyzed: %d → %s)..."
+python3 - << 'PYEOF'
+content = open("internal/report/report.go").read()
+old = 'fmt.Fprintf(tw, "  Entries analyzed:\\t%d\\n", stats.Total)'
+new = 'fmt.Fprintf(tw, "  Entries analyzed:\\t%s\\n", stats.Total)'
+result = content.replace(old, new)
+if result == content:
+    print("AVISO: substituição do vet bug não encontrou o trecho esperado — report.go pode já estar com bug ou formatação diferente")
+else:
+    open("internal/report/report.go", "w").write(result)
+    print("ok")
+PYEOF
 
 echo "[reset] introduzindo formatação quebrada em processor.go (função Avg)..."
 python3 - << 'PYEOF'
@@ -56,7 +71,7 @@ echo ""
 echo "✓ Pronto! Estado inicial restaurado com dois bugs intencionais:"
 echo ""
 echo "  ① processor.go → Avg() sem indentação (go fmt vai corrigir)"
-echo "  ② vet_demo.go  → badFormat com %s para int + badCounter com receiver por valor (go vet vai detectar)"
+echo "  ② report.go    → Entries analyzed: %s para int stats.Total (go vet vai detectar)"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "SEQUÊNCIA DA APRESENTAÇÃO"
@@ -69,8 +84,8 @@ echo "  3.  go version -m -json \$(which docker)"
 echo "  4.  cat go.mod"
 echo "  5.  go get github.com/fatih/color@latest"
 echo "  6.  cat go.mod && cat go.sum | head -5"
-echo "  7.  go run ./cmd/logscope -gen -lines 1000 -output access.log"
-echo "  8.  go run ./cmd/logscope -input access.log"
+echo "  7.  go run ./cmd/logscope -gen -lines 1000 -output testdata/access.log"
+echo "  8.  go run ./cmd/logscope -input testdata/access.log"
 echo "  9.  go run golang.org/x/vuln/cmd/govulncheck@latest ."
 echo "  10. go build -o logscope ./cmd/logscope && ls -lh logscope"
 echo "  11. ./logscope -gen -lines 100 | ./logscope"
@@ -88,9 +103,9 @@ echo "  20. gofmt -l ."
 echo "  21. gofmt -d internal/processor/processor.go"
 echo "  22. go fmt ./... && gofmt -l ."
 echo "  23. go vet ./..."
-echo "  24. # corrige vet_demo.go: badCounter receiver + %s→%d"
+echo "  24. # corrige report.go: %s → %d em Entries analyzed"
 echo "  25. go vet ./..."
-echo "  26. go test -short ./...                    # agora passa (bugs corrigidos)"
+echo "  26. go test -short ./...                    # passa (vet bug está em pacote sem testes)"
 echo "  27. go test -v ./internal/parser/"
 echo "  28. go env && go env -json GOPATH GOCACHE GOMODCACHE"
 echo "  29. go env -w GOTELEMETRY=off && cat \$(go env GOENV)"
