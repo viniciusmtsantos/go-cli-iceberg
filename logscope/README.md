@@ -4,6 +4,49 @@
 
 ---
 
+## 🎯 Entenda o Projeto em 2 Minutos
+
+**Logscope é um analisador de HTTP access logs** — te mostra estatísticas sobre quem acessou sua API:
+- Qual foi a latência média? (e p50, p95, p99)
+- Quantas requisições falharam vs sucesso?
+- Qual endpoint foi mais popular?
+
+### Os Dois Modos
+
+**🔄 Modo 1: Gerar dados**
+```bash
+go run ./cmd/logscope -gen -lines 1000 -output testdata/access.log
+```
+Cria 1000 linhas de log **realistas** (fake) com timestamps, métodos HTTP, paths, status codes, latências.
+
+**📊 Modo 2: Processar e analisar**
+```bash
+go run ./cmd/logscope -input testdata/access.log
+```
+Lê o arquivo, faz math nos dados, mostra um relatório com barras visuais:
+```
+Entries analyzed:  1000
+Latency:  avg=147ms  p50=42ms  p95=592ms  p99=1.7s
+Status Codes:  ████ 200 (625)  ██ 404 (243)  █ 500 (132)
+Top Endpoints:  /api/users (256)  /api/products (128)  /health (107)
+```
+
+**Pipeline (1 linha):**
+```bash
+go run ./cmd/logscope -gen -lines 1000 | go run ./cmd/logscope
+```
+
+### Por que esse projeto?
+
+Não é um projeto "real" — é **educacional**. Serve pra demonstrar comandos Go que você realmente usa em projetos:
+- `go test` → tem dois processors (seguro vs com race condition intencional)
+- `go fmt` → mostra formatação quebrada
+- `go vet` → bug de format string fica óbvio: `%!s(int=1000)`
+- `go run`, `go build`, `go install`, `go generate`
+- Benchmarks, profiling, tracing, build tags, CI commands
+
+---
+
 ## Abertura — `go help`
 
 > Sem terminal. Só fala.
