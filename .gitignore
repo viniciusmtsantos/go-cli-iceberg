@@ -1,0 +1,30 @@
+# generated during presentation
+testdata/access.log
+access.log
+
+# profiling/tracing
+*.prof
+trace.out
+coverage.out
+
+**/config.json
+**/gcp-credentials.json
+**/vendor/
+/.cache/
+/.cover/
+**/.env
+/.idea/
+.terraform*
+/.vscode/
+/_blackhole/
+/tooling/_tools/
+/bin/
+/blackhole/
+/coverage.html
+/images.tar
+/out/
+terraform.tfstate*
+/terraform.tfvars
+**/test-results/
+/tmp/
+*.pem

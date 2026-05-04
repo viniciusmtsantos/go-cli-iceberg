@@ -9,7 +9,7 @@ import (
 
 // ProcessNaive aggregates log entries concurrently WITHOUT proper synchronization.
 //
-// ⚠️  WARNING: This implementation contains a deliberate race condition.
+// WARNING: This implementation contains a deliberate race condition.
 // Multiple goroutines write concurrently to shared maps and fields
 // with no mutex protection — this is undefined behaviour in Go.
 //
@@ -39,7 +39,7 @@ func ProcessNaive(entries []entry.LogEntry) *Stats {
 		go func() {
 			defer wg.Done()
 
-			// 🚨 RACE CONDITION: all goroutines write to the same maps
+			// RACE CONDITION: all goroutines write to the same maps
 			// and fields with no synchronization. The race detector will
 			// report "DATA RACE" with the conflicting goroutine stack traces.
 			stats.Total++
