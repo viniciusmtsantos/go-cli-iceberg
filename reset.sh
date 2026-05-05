@@ -24,6 +24,8 @@ echo "[reset] restaurando arquivos de código ao estado limpo do git..."
 REPO_ROOT=$(git rev-parse --show-toplevel)
 git -C "$REPO_ROOT" checkout HEAD -- internal/processor/processor.go
 git -C "$REPO_ROOT" checkout HEAD -- internal/report/report.go
+git -C "$REPO_ROOT" checkout HEAD -- internal/parser/parser_test.go
+git -C "$REPO_ROOT" checkout HEAD -- internal/processor/naive.go
 
 echo "[reset] introduzindo bug de vet em report.go (Entries analyzed: %d → %s)..."
 python3 - << 'PYEOF'
