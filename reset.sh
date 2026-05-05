@@ -16,7 +16,7 @@ echo "[reset] restaurando go.mod ao estado sem dependências externas..."
 cat > go.mod << 'EOF'
 module github.com/gopher/logscope
 
-go 1.24
+go 1.25.0
 EOF
 rm -f go.sum
 
