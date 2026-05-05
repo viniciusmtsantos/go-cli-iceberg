@@ -1,147 +1,67 @@
-# logscope — O Iceberg da CLI do Go
+# O Iceberg da CLI do Go
 
 > **Antes de começar:** rode `./reset.sh` no terminal (não mostrar para o público).
 
----
-
 ## Abertura — `go help`
 
-> Sem terminal. Só fala.
-
-**🎯 A Porta de Entrada**
-- `go help` → lista TUDO: comandos + tópicos conceptuais do toolchain
+- `go help` → lista TUDO: comandos + tópicos conceituais do toolchain
 - `go help <command>` → documentação completa, offline, no terminal
 - `go help <topic>` → conceitos: `modules`, `buildconstraint`, `testflag`
 
-**💡 A Premissa**
 - Mais que apresentação de comandos (cansativa) → convite a explorar
 - `go help` é seu mapa. Cada bloco terminará sugerindo: *"explore com `go help <x>`"*
 - Vocês vão sair daqui motivados a conhecer sozinhos o resto
 
 ---
 
-## 🌊 Superfície — comandos do dia a dia
+## CAMADA 1 — Let's Go
 
-### Bloco 0 — O Projeto de Estudo
+### Bloco 0 — `go version`
 
-> Sem terminal. Abre o editor e mostra o código.
+```bash
+go version
+go version -m $(which docker)
+```
 
-**🎯 logscope — Analisador de Logs HTTP**
-- O que faz: lê logs HTTP → calcula latências, status, endpoints
+-  Extrai metadados embutidos no executável pra mostrar como foi compilado
+
+---
+
+### Bloco 0 — Logscope: Analisador de Logs HTTP**
+- O que faz: lê logs HTTP → analisa latências, status, endpoints
 
 ```bash
 go run ./cmd/logscope -input testdata/access.log
 ```
 
-### Bloco 1 — `go version`
+### Bloco 2 — `go mod init` + `go get` + `go mod tidy`
 
-**🎯 Conhecer seu compilador**
-- Roda `go version` → versão do binário
-- `-m` flag → revela metadata do executável (auditoria)
-- `-m -json` → formato estruturado (CI/CD automation)
-
-**📊 Demonstração**
 ```bash
-go version
-```
-
-**🔍 Inspecionando executáveis estranhos**
-```bash
-go version $(which docker)
-go version -m -json $(which docker)
-```
-
-Resultado: buildmode, compiler, ldflags, CGO_ENABLED, GOARCH, GOOS — tudo que o linker injetou
-
-**💡 Por que importa**
-- Auditar dependências sem ter o código-fonte
-- Verificar flags de build em produção
-- Identificar se foi compilado com segurança (PIE, race detector ativo)
-
-> Próximo: `go help version`
-
----
-
-### Bloco 2 — `go.mod` + `go get` + `go mod tidy`
-
-**🎯 Gerenciar Dependências com Segurança**
-- Contrato do projeto: módulo + versão mínima
-- `go get` → baixa + atualiza dependências
-- `go.sum` → lockfile criptográfico (ninguém substitui dep sem Go perceber)
-- `go mod tidy` → remove deps que não são importadas
-
-**📂 Setup Inicial**
-```bash
-cat go.mod
-```
-Saída: `module`, `go 1.24` — sem deps ainda
-
-**⬇️ Adicionar Dependência**
-```bash
+go mod init
 go get github.com/fatih/color@latest
+go mod tidy
 ```
-
-```bash
-cat go.mod
-cat go.sum
-```
-
-Resultado: `fatih/color` adicionado com versão, `go.sum` com hashes criptográficos
-
-**⚠️ Detalhe importante**
-- A diretiva `go` no `go.mod` pode ter subido → é a **versão mínima que o grafo exige**, não a instalada
-- Não chamaremos `go mod tidy` aqui — vamos usar essa dep nos próximos blocos
-
-> Próximo: `go help modules`
 
 ---
 
-### Bloco 3 — `go test` (primeira tentativa)
+### Bloco 3 — `go test`
 
-**🎯 Detectar Problemas Cedo**
-- Módulo configurado → vamos validar a qualidade antes de rodar
-
-**❌ Primeira Execução**
 ```bash
-go test ./...
+go test -v ./...
 ```
 
-Erro em `internal/report/report.go:30`: `%s` formatando um `int` → `%!s(int=...)`
+- `go test` + `go vet` (análise estática)
 
-- `go test ./...` → roda testes + `go vet` (análise estática) que encontra bugs que compilador não vê
-- Compilava, mas em produção corromperia o log
 
-**💡 O que aconteceu**
-- Suite de qualidade trabalhando: vet passou, encontrou formato de string errado
-- Detalhe: `-short` flag pula testes destrutivos durante dev
-- **go vet** roda INDEPENDENTE do `-short`
-
-**✅ Com Proteção**
 ```bash
-go test -short ./...
+go test -v -short ./...
 ```
-
-- Testes skip ok (vamos ver isso no Bloco 19)
-- **go vet ainda roda** — bug ainda aparece
-- Resolve com: `%s` → `%d` em `Entries analyzed`
 
 > Próximo: `go help testflag`
 
 ---
 
-### Bloco 4 — `go run` (executar sem compilar)
-
-**🎯 Dev Rápido — Compile & Execute em Memória**
-- Testes detectaram problemas, mas código ainda **compila e roda**
-- Avisos não são fatais — vamos testar a prática
-- `go run` = temporário (sem binário no disco)
-
-**📊 Demonstração**
-```bash
-go run ./cmd/logscope -input testdata/access.log
-```
-
-**🔒 Auditando Vulnerabilidades**
+### Bloco 4 — `go run`
 
 Usando `govulncheck` para varrer dependências procurando CVEs públicas
 
@@ -149,48 +69,15 @@ Usando `govulncheck` para varrer dependências procurando CVEs públicas
 go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ```
 
-Resultado: Dois pontos importantes:
-1. `go run` com módulo externo → baixa, compila, executa isolado (sem afetar seu `go.mod`)
-
-> Próximo: `go help run`
-
 ---
 
-### Bloco 5 — `go build`
+### Bloco 5 — `go build` + `go install`
 
-**🎯 Compilar para Produção**
-- Gera binário nativo na pasta atual (sem runtime, sem JVM)
-- `-o` flag nomeia o resultado
-- Fechamos o ciclo: build → inspect (como no Bloco 1)
-
-**🔨 Build Nativo**
 ```bash
-go build -o logscope_novo ./cmd/logscope
-./logscope_novo -input testdata/access.log
+go build -o iceberg ./cmd/logscope
+./iceberg -input testdata/access.log
+go install -n ./cmd/logscope  # -n pra printar sem excutar nada
 ```
-
-**🔍 Inspecionando o Binário Compilado**
-```bash
-go version -m ./logscope_novo
-```
-
----
-
-### Bloco 6 — `go install`
-
-**🎯 Compilar + Distribuir Globalmente**
-- `go build` → binário aqui
-- `go install` → compila e move para `$GOPATH/bin`, acessível globalmente
-- `-n` - mkdir temporário → compilação → link → mv para `$GOPATH/bin`
-
-**📦 Instalação**
-```bash
-go install -n ./cmd/logscope  # -n: print steps without executing
-go install ./cmd/logscope
-$(go env GOPATH)/bin/logscope -input testdata/access.log
-```
-
-> Próximo: `go help install`
 
 ---
 
@@ -303,13 +190,11 @@ go test -short -cover ./internal/...
 **🔍 Por Função**
 ```bash
 go test -short -coverprofile=coverage.out ./internal/...
-go tool cover -func=coverage.out
 ```
-
-Resultado: Percentual por função (sabe exatamente qual caminho nunca foi testado)
 
 **🎨 Visual HTML**
 ```bash
+go tool cover -func=coverage.out
 go tool cover -html=coverage.out
 ```
 
@@ -319,12 +204,7 @@ Resultado: Navegador abre com linhas vermelhas (não cobertas) e verdes (coberta
 
 ---
 
-### Bloco 13 — `go clean`
-
-**🎯 Limpeza Cirúrgica — Cache, Temporários, Deps**
-- Dependências adicionadas agora não usadas? Remover
-- Cache crescendo? Liberar espaço
-- Build suspeito? Reset completo
+### Bloco 13 — Faxina `go clean`
 
 **🧹 Remover Deps Não Usadas**
 ```bash
@@ -613,17 +493,6 @@ go test -fuzz=FuzzParseReader -fuzztime=5m ./internal/parser/  # CI/CD: 5 min
 
 ### Bloco 21 — `go test -shuffle` + `go test -count`
 
-**🎯 Detectar Problemas Ocultos**
-- Testes só passam em certa ordem? Dependência de estado (bug!)
-- Flaky tests? Rode múltiplas vezes
-
-**🔀 Aleatorizar Ordem**
-```bash
-go test -shuffle=on -v ./internal/parser/
-```
-
-Se teste só passa depois de outro = dependência de estado que `-shuffle` expõe
-
 **🔄 Rodar Múltiplas Vezes**
 ```bash
 go test -short -count=3 ./internal/...
@@ -645,12 +514,7 @@ Resultado: Suite inteira 3 vezes
 
 **💾 Preparação (Dados Pesados)**
 ```bash
-./logscope -gen -lines 200000 -output testdata/access.log
 ./logscope -input testdata/access.log -cpuprofile cpu.prof
-```
-
-**🔍 Analisar (Servidor Web Interativo)**
-```bash
 go tool pprof -no_browser -http=:8080 cpu.prof
 ```
 
@@ -669,48 +533,10 @@ go tool pprof -no_browser -http=:8081 mem.prof
 
 Resultado: Heap Profile (foto da RAM post-GC)
 - Vazamento de memória? Função está esquecendo liberar dados? **Essa tela aponta**
-- Kubernetes travando? `pprof` te salva
-
-> Próximo: `go help tool`, `go help pprof`
-
----
-
-### Bloco 23 — `go tool trace`
-
-**🎯 Ressonância Magnética em Vídeo**
-- `pprof` = raio-X estático (ONDE a CPU gasta tempo)
-- `trace` = vídeo (COMO as coisas acontecem ao longo do tempo)
-
-**🔍 O Dilema: CPU Livre Mas Lento**
-- Servidor 80% CPU livre, aplicação travada
-- `pprof` não aponta nada errado
-- O que tá acontecendo? **Goroutines bloqueadas** (travas, canais)
-
-**📹 Capturar Trace**
-```bash
-./logscope -input testdata/access.log -trace trace.out
-go tool trace trace.out
-```
-
-**(Navegador) → "View trace"** *(Dica: W = zoom, A/D = navegar)*
-
-**📊 Visualização**
-- Linhas verdes = núcleos do CPU (Proc 0, Proc 1, ...)
-- Barrinhas coloridas = Goroutines sendo executadas
-- Sênior usa isso para entender scheduler visualmente
-
-**🔍 O que Ver**
-- Quando Goroutine nasceu
-- Quanto tempo esperou na fila
-- Quando travou esperando disco
-- Quando GC fez "Stop The World"
-
-**💡 Por que Importa**
-- Código lendo OK, mas concorrência errada?
-- Trace te dá visão de raio-X da arquitetura
 
 > Próximo: `go help tool`
----
+
+--
 
 ### Bloco 24 — `go bug` (NOVO - Escape Hatch)
 
@@ -729,18 +555,6 @@ go tool trace trace.out
 go bug
 ```
 
-Resultado: Navegador abre issue template pré-preenchido
-- Go version
-- OS/Arch
-- Go env
-- Go version -m
-- Tudo que time do Go precisa para investigar
-
-**💡 Importante**
-- 99% das vezes é você (código), não o Go (raro)
-- Mas quando é o Go, `go bug` acelera investigação
-- Comunidade é responsiva — issue bem feita = resposta rápida
-
 **🎓 Closure: O Iceberg Completo**
 - Começamos em `go help` (porta de entrada)
 - Percorremos superfície → dev rápido → compilação → distribuição
@@ -749,7 +563,6 @@ Resultado: Navegador abre issue template pré-preenchido
 - Camada 4: performance, concorrência, observabilidade profunda
 - E quando tudo falha: `go bug`
 
-> Próximo: `go help bug`
 ## Resumo
 
 | Comando | O que entrega |
@@ -770,15 +583,10 @@ Resultado: Navegador abre issue template pré-preenchido
 | `go test -cover` | Cobertura — sabe o que está sendo testado |
 | `go clean` | Gestão cirúrgica do cache de build e módulos |
 | `go generate` | Automação de geração de código |
-| `-ldflags` + `-tags` | Build customizado sem magic |
-| `-trimpath` | Builds reproduzíveis, sem paths locais |
+| `go build -ldflags` + `-tags` | Build customizado sem magic |
 | `go test -race` | Detecta corridas de dados em tempo de execução |
 | `go test -fuzz` | Encontra bugs com entradas aleatórias |
 | `go test -shuffle` | Detecta dependências ocultas entre testes |
 | `go test -bench` | Mede performance real (latência, throughput, memória) |
 | `go tool pprof` | Profiling de CPU e memória |
-| `go tool trace` | Visualiza goroutines e scheduler |
-| `go tool nm` | Inspeciona símbolos compilados no binário |
 | `go bug` | Reporta bugs para a comunidade Go |
-
-> **Esse é o iceberg. A maioria conhece a ponta. Você agora conhece o fundo.**
