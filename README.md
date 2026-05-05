@@ -4,49 +4,6 @@
 
 ---
 
-## 🎯 Entenda o Projeto em 2 Minutos
-
-**Logscope é um analisador de HTTP access logs** — te mostra estatísticas sobre quem acessou sua API:
-- Qual foi a latência média? (e p50, p95, p99)
-- Quantas requisições falharam vs sucesso?
-- Qual endpoint foi mais popular?
-
-### Os Dois Modos
-
-**🔄 Modo 1: Gerar dados**
-```bash
-go run ./cmd/logscope -gen -lines 1000 -output testdata/access.log
-```
-Cria 1000 linhas de log **realistas** (fake) com timestamps, métodos HTTP, paths, status codes, latências.
-
-**📊 Modo 2: Processar e analisar**
-```bash
-go run ./cmd/logscope -input testdata/access.log
-```
-Lê o arquivo, faz math nos dados, mostra um relatório com barras visuais:
-```
-Entries analyzed:  1000
-Latency:  avg=147ms  p50=42ms  p95=592ms  p99=1.7s
-Status Codes:  ████ 200 (625)  ██ 404 (243)  █ 500 (132)
-Top Endpoints:  /api/users (256)  /api/products (128)  /health (107)
-```
-
-**Pipeline (1 linha):**
-```bash
-go run ./cmd/logscope -gen -lines 1000 | go run ./cmd/logscope
-```
-
-### Por que esse projeto?
-
-Não é um projeto "real" — é **educacional**. Serve pra demonstrar comandos Go que você realmente usa em projetos:
-- `go test` → tem dois processors (seguro vs com race condition intencional)
-- `go fmt` → mostra formatação quebrada
-- `go vet` → bug de format string fica óbvio: `%!s(int=1000)`
-- `go run`, `go build`, `go install`, `go generate`
-- Benchmarks, profiling, tracing, build tags, CI commands
-
----
-
 ## Abertura — `go help`
 
 > Sem terminal. Só fala.
@@ -55,7 +12,7 @@ Não é um projeto "real" — é **educacional**. Serve pra demonstrar comandos 
 - `go help` → lista todos os comandos **e** tópicos de conceito do toolchain
 - `go help <command>` → doc completa de qualquer comando, no terminal
 - `go help <topic>` → conceitos como `modules`, `buildconstraint`, `testflag`
-- _"Cada flag que aparecer daqui pra frente tem `go help` atrás. Guarda isso."_
+- _"Podiamos terminar aqui, porque  mais do que uma apresentação sobre comandos de terminal, que tem uma grande tendencia de ser cansativa, é um convite a explorar o que o toolchain do Go tem a oferecer. O `go help`é seu mapa, aproveite ele."_
 
 ---
 
@@ -76,33 +33,55 @@ Não é um projeto "real" — é **educacional**. Serve pra demonstrar comandos 
 - _"A estrutura do projeto segue as convenções do módulo Go — `go help modules` documenta o sistema de módulos."_
 - _"O projeto está aqui. Sem binário, sem artefatos. Vamos resolver isso agora."_
 
+### Os Dois Modos
+
+**🔄 Modo 1: Gerar dados**
+```bash
+go run ./cmd/logscope -gen -lines 1000 -output testdata/access.log
+```
+Cria 1000 linhas de log **realistas** (fake) com timestamps, métodos HTTP, paths, status codes, latências.
+
+**📊 Modo 2: Processar e analisar**
+```bash
+go run ./cmd/logscope -input testdata/access.log
+```
+Lê o arquivo, faz math nos dados, mostra um relatório com barras visuais:
+
+### Por que esse projeto?
+
+Não é um projeto "real" — é **educacional**. Serve pra gente explorar alguns comandos juntos
+
 ---
 
 ### Bloco 1 — `go version`
 
-- Roda `go version` → versão do runtime
-- _"Mas olha o que `-m` e `-json` fazem juntos — descobrimos isso no `go help version`."_
+- Roda `go version` → versão do seu binario
 
 ```bash
 go version
+```
+
+> _"Mas olha `go help version`, podemos observar a versão do go que compilou o binário"_
+
+```bash
 go version $(which docker)
 ```
 
-> _"Podemos ver o binario como uma caixa preta que só vai ser executada, mas com version -m a gente consegue revelar algumas informações do nosso executavel que podem ser uteis para auditoria."_
+> _"Outra coisa, podemos ver o binario como uma caixa preta que só vai ser executada, mas com `-m` a gente consegue revelar algumas informações do nosso executavel que podem ser uteis para auditoria."_
 
-```
+```bash
 go version -m -json $(which docker)
 
 /usr/bin/docker: go1.24.5 -- A versão exata do compilador Go que foi usada para gerar este binário
         path    github.com/docker/cli/cmd/docker 
-        - O caminho do pacote principal
+        # O caminho do pacote principal
         build   -buildmode=pie 
-        - Position Independent Executable. É uma flag de segurança que carrega o binário em locais de memória aleatórios toda vez que ele é executado, dificultando a exploração de vulnerabilidades em memória
-        build   -compiler=gc 
-        - Indica qual compilador foi usado. gc é o compilador padrão
+        # Position Independent Executable. É uma flag de segurança que carrega o binário em locais de memória aleatórios toda vez que ele é executado, dificultando a exploração de vulnerabilidades em memória
+        build   -compiler=gc
+        # Indica qual compilador foi usado. gc é o compilador padrão
         build   -ldflags=" -X \"github.com/docker/cli/cli/version.GitCommit=980b856\" -X \"github.com/docker/cli/cli/version.BuildTime=2025-07-25T11:34:09Z\" -X 
         \"github.com/docker/cli/cli/version.Version=28.3.3\" -X \"github.com/docker/cli/cli/version.PlatformName=Docker Engine - Community\""
-        - vamos ver estes carinhas aqui mais pro fundo do iceberg
+        # vamos ver estes carinhas aqui mais pro fundo do iceberg
         build   -tags=pkcs11
         build   DefaultGODEBUG=asynctimerchan=1,gotestjsonbuildtext=1,gotypesalias=0,httplaxcontentlength=1,httpmuxgo121=1,httpservecontentkeepheaders=1,multipathtcp=0,netedns0=0,panicnil=1,randseednop=0,rsa1024min=0,tls10server=1,tls3des=1,tlsmlkem=0,tlsrsakex=1,tlsunsafeekm=1,winreadlinkvolume=0,winsymlink=0,x509keypairleaf=0,x509negativeserial=1,x509rsacrt=0,x509usepolicies=0
         build   CGO_ENABLED=1
@@ -117,13 +96,13 @@ go version -m -json $(which docker)
 
 ### Bloco 2 — `go.mod` + `go get` + `go mod tidy`
 
-> _"Antes de rodar qualquer coisa, o projeto precisa de um módulo."_
+> _"Antes de rodar qualquer este cara, o projeto precisa de um módulo."_
 
 ```bash
 cat go.mod
 ```
 
-> _"Esse arquivo é o contrato do projeto. Só `module` e `go version` — sem dependências ainda. O nome do módulo é o caminho de import, mesmo sem estar no GitHub."_
+> _"Esse arquivo é o contrato do projeto. Só `module` e `go 1.24` — sem dependências ainda. O nome do módulo é o caminho de import, mesmo sem estar no GitHub."_
 
 > _"Vou adicionar a lib `fatih/color` para colorir o terminal."_
 
@@ -146,7 +125,7 @@ cat go.sum | head -5
 ```bash
 go test ./...
 ```
-
+> _"Puts, deu erro D;"_
 > _"O que você espera? Testes passam ou falham? Bem, o `go test` não roda os testes cegamente — ele passa o código pelo `go vet` primeiro. O go vet faz uma análise estática do código para detectar problemas comuns. Neste caso, falha porque há um bug detectado: `internal/report/report.go:30` — `%s` tentando formatar um `int`."_
 
 > _"Isso é exatamente o que queremos: a suite de qualidade avisando que tem coisa para resolver antes de continuar."_
