@@ -19,26 +19,37 @@
 ### Bloco 0 — `go version`
 
 ```bash
+# Versão do Go instalada
 go version
+```
+
+```bash
+# Extrai metadados embutidos no executável analisado pra mostrar informações de compilação
 go version -m $(which docker)
 ```
 
--  Extrai metadados embutidos no executável pra mostrar como foi compilado
-
 ---
 
-### Bloco 0 — Logscope: Analisador de Logs HTTP**
-- O que faz: lê logs HTTP → analisa latências, status, endpoints
+### Bloco 1 — Logscope: Analisador de Logs HTTP
+- Lê logs HTTP → Analisa e cria relatório de latência, status e endpoints a partir do access.log
 
 ```bash
+# Rodando o projeto indicando o pacote main
 go run ./cmd/logscope -input testdata/access.log
 ```
 
-### Bloco 2 — `go mod init` + `go get` + `go mod tidy`
+### Bloco 2 — `go mod init` || `go get` || `go mod tidy`
 
 ```bash
-go mod init
+# Inicializa um novo módulo Go
+go mod init github.com/gopher/logscope
+```
+```bash
+# Adiciona uma dependência (ex: color para colorir o output)
 go get github.com/fatih/color@latest
+```
+```bash
+# Faz a faxina no nosso módulo
 go mod tidy
 ```
 
@@ -47,17 +58,17 @@ go mod tidy
 ### Bloco 3 — `go test`
 
 ```bash
+# Rodar todos os testes do projeto com verbose
 go test -v ./...
 ```
 
-- `go test` + `go vet` (análise estática)
-
 
 ```bash
+# Rodar testes rápidos (ignora testes longos) com verbose
 go test -v -short ./...
 ```
 
-> Próximo: `go help testflag`
+> Dica de flags: `go help testflag`
 
 ---
 
@@ -66,6 +77,7 @@ go test -v -short ./...
 Usando `govulncheck` para varrer dependências procurando CVEs públicas
 
 ```bash
+# Rodar o analisador de vulnerabilidades em todas as dependências do projeto em memoria
 go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ```
 
@@ -74,9 +86,13 @@ go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ### Bloco 5 — `go build` + `go install`
 
 ```bash
-go build -o iceberg ./cmd/logscope
-./iceberg -input testdata/access.log
-go install -n ./cmd/logscope  # -n pra printar sem excutar nada
+go build -o hexa_mundial ./cmd/logscope
+./hexa_mundial -input testdata/access.log
+```
+
+```bash
+# Compila e instala globalmente (disponível em $GOPATH/bin)
+go install -n ./cmd/logscope
 ```
 
 ---
