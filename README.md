@@ -10,6 +10,9 @@
 
 ---
 
+### Projeto Logscope: Nosso Playground
+Recebe uma amostra de logs, processa e cria relatório sobre top endpoints, status de request e percentis de latência.
+
 ## CAMADA 1 - Let's Go
 
 ### Bloco 1.1 |  `go version`
@@ -26,15 +29,7 @@ go version -m $(which docker)
 
 ---
 
-### Bloco 1.2 | Projeto Logscope: sandbox para os comandos do Go
-Recebe uma amostra de logs, processa e cria relatório sobre top endpoints, status de request e percentis de latência.
-
-_Executar o projeto indicando o pacote main_
-```bash
-go run ./cmd/logscope -input testdata/access.log
-```
-
-### Bloco 1.3 |  `go mod`   `go list`   `go get`
+### Bloco 1.2 |  `go mod`   `go list`   `go get`
 
 _Inicializar novo módulo Go_
 ```bash
@@ -60,7 +55,7 @@ go get -u ./...
 
 ---
 
-### Bloco 1.4 |  `go test`
+### Bloco 1.3 |  `go test`
 
 _Executar todos os testes do projeto com verbose_
 ```bash
@@ -72,26 +67,27 @@ Flag  `-short`  _Mudar comportamento padrão de execução dos testes_
 go test -v -short ./...
 ```
 
-Flag  `-count`  _→ Executar testes X vezes. `-count=1` é forma idiomática de desabilitar cache_
-```bash
-go test -short -count=3 ./internal/...
-```
-
 **Explore  `go help testflag`**
 
 ---
 
-### Bloco 1.5 |  `go run`
-**Executar uma ferramenta Go diretamente sem instalar**
+### Bloco 1.4 |  `go run`
 
-_Nesse exemplo, `govulncheck` pra analisar vulnerabilidades nas dependências do projeto_
+**Executar meu projeto sem compilar um binário local**
+_Executar o projeto indicando o pacote main_
+```bash
+go run ./cmd/logscope -input testdata/access.log
+```
+
+**Executar um pacote Go diretamente sem instalar**
+_`govulncheck`  analisa vulnerabilidades nas dependências do projeto_
 ```bash
 go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ```
 
 ---
 
-### Bloco 1.6 |  `go build`   `go install`
+### Bloco 1.5 |  `go build`   `go install`
 
 _Compilar o projeto para um binário local (sem instalar globalmente)_ 
 ```bash
