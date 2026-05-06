@@ -177,7 +177,7 @@ go fmt ./...
 ### `go fix`
 **Refatorar dependências depreciadas e trechos do código para padrões conhecidos**
 
-_Atualizar e corrigir partes do código automaticamente_
+_Formatar e refatorar partes do código automaticamente_
 ```bash
 go fix ./... 
 ```
