@@ -68,11 +68,17 @@ _Executar todos os testes do projeto com verbose_
 go test -v ./...
 ```
 
-
 Flag  `-short`  _Mudar comportamento padrão de execução dos testes_
 ```bash
 go test -v -short ./...
 ```
+
+Flag  `-count`  _→ Executar testes X vezes. `-count=1` é forma idiomática de desabilitar cache_
+```bash
+go test -short -count=3 ./internal/...
+```
+
+---
 
 **Explore  `go help testflag`**
 
@@ -102,6 +108,7 @@ go install ./cmd/logscope
 ```
 
 **Explore  `go help buildmode`**
+
 ---
 
 ## CAMADA 2 - Documentação, Qualidade e Ambiente
@@ -137,6 +144,7 @@ go fmt ./...
 ```
 
 **Explore  `gofmt -help`**
+
 ---
 
 ### Bloco 8 |  `go fix`
@@ -196,11 +204,11 @@ _Criar um HTML com visualização de cobertura a partir do output.out_
 go tool cover -html=coverage.out
 ```
 
-**Explore  `go help tool`**
+**Explore  `go help testfunc`**
 
 ---
 
-### Bloco 11 |  Limpeza `go clean`
+### Bloco 11 |  Limpeza  `go clean`
 
 _Limpa o cache de testes (força reexecução dos testes na próxima vez)_
 ```bash
@@ -258,7 +266,7 @@ go version -m ./logscope-linker
 
 ---
 
-### Bloco 14 |  `GOOS` e `go build` para cross compilation
+### Bloco 14 |  `go build` com cross compilation
 
 _Compilar executável para Windows_
 ```bash
@@ -269,6 +277,8 @@ _Verificar o executável gerado_
 ```bash
 file logscope.exe
 ```
+
+**Explore  `go help buildconstraint`**
 
 ---
 
@@ -284,7 +294,7 @@ go test -bench=. -benchmem ./internal/parser/
 **Interpretando Resultados** (ex: `BenchmarkParseReader-12`)
 1. **Iterações** (`V`): Go rodou V milhões de vezes em 1 segundo
 2. **Latência** (`X ns/op`): X nanossegundos por linha processada
-3. **Memory** (`Y B/op, Z allocs/op`): Y bytes e Z alocações por operação
+3. **Memoria** (`Y B/op, Z allocs/op`): Y bytes e Z alocações por operação
 4. **Paralelismo** (sufixo `-12`): usou todos os 12 núcleos disponíveis
 
 #### Erro Comum: Não pré-alocar memória
@@ -311,52 +321,33 @@ Flag  `-race`  _→ Executar o teste instrumentando cada acesso à memória_
 ```bash
 go test -race -run TestNaiveRace ./internal/processor/
 ```
-- Ele te diz exatamente: qual variável, qual linha, quais goroutines conflitaram
+
+_O  `-race`  diz: qual variável, qual linha, quais goroutines conflitaram_
 
 ---
 
-### Bloco 17 |  `go test -count`
+### Bloco 17 |  `go tool pprof`
 
-Flag  `-count`  _→ Executar testes X vezes. `-count=1` é forma idiomática de desabilitar cache_
-```bash
-go test -short -count=3 ./internal/...
-```
+**Profiling — Raio-X**
+Flag  `pprof`  _→ Profiler de CPU/Memória oficial do Go_
 
----
-
-### Bloco 18 |  `go tool pprof`
-
-**Profiling — Raio-X do Programa em Execução**
-- `go tool` → canivete suíço de ferramentas baixo nível
-- `pprof` → CPU/Memória profiler oficial do Go
-
-**💾 Preparação (Dados Pesados)**
+**Preparação a amostragem do profiling de mCPU**
 ```bash
 ./logscope -input testdata/access.log -cpuprofile cpu.prof
 go tool pprof -http=:8080 cpu.prof
 ```
 
-**(No navegador) → Menu "View" → "Flame Graph"**
-
-**🎨 Flame Graph**
-- Largura do retângulo = tempo de CPU consumido
-- Altura = profundidade de stack
-- Bateu olho, achou gargalo em 5 segundos
-
-**🧠 Memória**
+**Preparação a amostragem do profiling de memória**
 ```bash
 ./logscope -input testdata/access.log -memprofile mem.prof
 go tool pprof -http=:8081 mem.prof
 ```
 
-Resultado: Heap Profile (foto da RAM post-GC)
-- Vazamento de memória? Função está esquecendo liberar dados? **Essa tela aponta**
-
-**Explore `go help tool`**
+**Explore  `go help tool`**
 
 ---
 
-### Bloco 19 |  `go bug`
+### Bloco 18 |  `go bug`
 
 **Reportar Bugs para a turma da marmota**
 _Comportamento estranho da lingageum ou do toolchain? Suspeita de bug no próprio Go?_
