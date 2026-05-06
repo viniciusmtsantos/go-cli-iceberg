@@ -13,6 +13,7 @@ import (
 	"sort"
 	"text/tabwriter"
 
+	"github.com/fatih/color"
 	"github.com/gopher/logscope/internal/processor"
 )
 
@@ -41,7 +42,8 @@ func Write(w io.Writer, stats *processor.Stats) {
 	fmt.Fprintln(tw, "  Status Codes")
 	for _, s := range sortedIntKeys(stats.ByStatus) {
 		bar := progressBar(stats.ByStatus[s], stats.Total, 20)
-		fmt.Fprintf(tw, "    %d:\t%s  %d\n", s, bar, stats.ByStatus[s])
+		statusColor := getStatusColor(s)
+		fmt.Fprintf(tw, "    %s:\t%s  %d\n", statusColor.Sprint(s), bar, stats.ByStatus[s])
 	}
 	fmt.Fprintln(tw)
 
@@ -124,4 +126,19 @@ func sortedStringKeys(m map[string]int) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+func getStatusColor(status int) *color.Color {
+	switch {
+	case status >= 200 && status < 300:
+		return color.New(color.FgGreen)
+	case status >= 300 && status < 400:
+		return color.New(color.FgCyan)
+	case status >= 400 && status < 500:
+		return color.New(color.FgYellow)
+	case status >= 500:
+		return color.New(color.FgRed)
+	default:
+		return color.New(color.FgWhite)
+	}
 }

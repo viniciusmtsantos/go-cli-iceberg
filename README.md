@@ -1,7 +1,5 @@
 # O Iceberg da CLI do Go
 
-> **Antes de começar:** rode `./reset.sh` no terminal (não mostrar para o público).
-
 ## Abertura — `go help`
 
 - `go help` → lista TUDO: comandos + tópicos conceituais do toolchain
@@ -31,7 +29,7 @@ go version -m $(which docker)
 ---
 
 ### Bloco 1 — Logscope: Analisador de Logs HTTP
-- Lê logs HTTP → Analisa e cria relatório de latência, status e endpoints a partir do access.log
+> ANALISA LOGS → Cria relatório de latência, status e endpoints a partir do access.log
 
 ```bash
 # Rodando o projeto indicando o pacote main
@@ -68,13 +66,12 @@ go test -v ./...
 go test -v -short ./...
 ```
 
-> Dica de flags: `go help testflag`
+> Explore: `go help testflag`
 
 ---
 
 ### Bloco 4 — `go run`
-
-Usando `govulncheck` para varrer dependências procurando CVEs públicas
+> Rodando um pacote externo diretamente com `go run`
 
 ```bash
 # Rodar o analisador de vulnerabilidades em todas as dependências do projeto em memoria
@@ -86,13 +83,14 @@ go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ### Bloco 5 — `go build` + `go install`
 
 ```bash
+# Compila o projeto para um binário local (sem instalar globalmente)
 go build -o hexa_mundial ./cmd/logscope
 ./hexa_mundial -input testdata/access.log
 ```
 
 ```bash
 # Compila e instala globalmente (disponível em $GOPATH/bin)
-go install -n ./cmd/logscope
+go install ./cmd/logscope
 ```
 
 ---
@@ -101,332 +99,221 @@ go install -n ./cmd/logscope
 
 ### Bloco 7 — `go doc`
 
-**🎯 Documentação Local — Offline**
-- Como descobrir o que `ParseReader` faz sem abrir o navegador?
-- `go doc fmt.Printf` → parâmetros, tipos, comportamento, no terminal
-
 **📖 Stdlib Docs**
 ```bash
+# Documentação offline para a função fmt.Printf
 go doc fmt.Printf
 ```
 
 **🔍 Seu Próprio Código**
 ```bash
+# Documentação do pacote entry
 go doc ./pkg/entry
-go doc ./pkg/entry LogEntry
 ```
 
-> Próximo: `go help doc`
+```bash
+# Documentação da struct LogEntry
+go doc ./pkg/entry LogEntry
+```
 
 ---
 
 ### Bloco 8 — `go fmt`
 
-**🎯 Formatação Canônica — Zero Debate**
-- `go fmt` (atalho) → formata o projeto (~rápido, sem flags)
-- `gofmt` (motor) → tool raiz (flags: `-l` listar, `-d` diff)
-
-**✅ Aplicar Formatação**
-```bash
-go fmt ./...
-```
+**O atalho e o motor**
+- `go fmt` (atalho) → `gofmt -l -w`
+- `gofmt` (motor) → `gofmt [flags] [path]`
 
 ```bash
+# Listar arquivos que precisam de formatação
 gofmt -l -d .
 ```
 
-> Próximo: `go help fmt`
+```bash
+# Aplica formatação no projeto inteiro
+go fmt ./...
+```
 
+> Explore `gofmt -help`
 ---
 
 ### Bloco 9.0 — `go fix`
 
-**🔧 Quando Usar**
-- Remover deprecated APIs
-- Refatoração de padrão conhecido
-
-**💡 Exemplo Real**
 ```bash
+# Atualiza e corrige partes do código automaticamente
 go fix ./... 
 ```
 
-- Nem sempre vai ser algo que vai resolver todos os problemas do nosso código, mas pode ser uma ferramenta poderosa
+**Quando Usar**
+- Remover APIs depreciadas
+- Refatorar partes do código para padrões conhecidos
 
-> Próximo: `go help fix`
+**Atenção**
+- Não vai resolver todos os seus problemas, mas é uma ferramenta útil
 
 ---
 
 ### Bloco 10 — `go env`
 
-**🔧 Superpoder: Configuração Global**
+**Configuração Global**
 ```bash
+# Configura valor pra GOFLAGS (trimpath remove caminhos do sistema dos binários durante build)
 go env -w GOFLAGS=-trimpath
-go env GOFLAGS
-go env -u GOFLAGS  # desfazer
 ```
 
-> Próximo: `go help environment`
+```bash
+go env GOFLAGS
+```
+
+```bash
+go env -u GOFLAGS
+```
+
+> Explore: `go help environment`
 
 ---
 
 ### Bloco 11 — `go list`
 
-**🎯 Listar Pacotes e Módulos**
-- Você sabe exatamente o que está carregando?
-- Dependências atualizadas?
-
-**📋 Listar Pacotes do Projeto**
 ```bash
+# Listar os pacotes do projeto
 go list ./...
 ```
 
-**🔍 Auditar Dependências**
 ```bash
-go list -m all
-go list -m -u all  # -u: versão mais nova disponível
+# Listar dependências do projeto indicando versão mais nova disponível para elas
+go list -m -u all
 ```
-
-Resultado: `[v...]` ao lado de deps = alerta de desatualização
-
-> Próximo: `go help list`
 
 ---
 
 ### Bloco 12 — `go test -cover`
 
-**🎯 Cobertura de Testes — Saber o que está sendo testado**
+**Cobertura de Testes**
 - Testes passam, mas quanto do código está exercitado?
-- Percentual + análise por função + HTML visual
 
-**📊 Coverage Simples**
 ```bash
+# Cobertura geral do projeto
 go test -short -cover ./internal/...
 ```
 
-**🔍 Por Função**
 ```bash
+# Gera arquivo de cobertura para análise com `go tool cover`
 go test -short -coverprofile=coverage.out ./internal/...
 ```
 
-**🎨 Visual HTML**
 ```bash
+# Cobertura por função
 go tool cover -func=coverage.out
+```
+
+```bash
+# Abre um navegador com visualização de cobertura (linhas vermelhas = não cobertas, verdes = cobertas)
 go tool cover -html=coverage.out
 ```
 
-Resultado: Navegador abre com linhas vermelhas (não cobertas) e verdes (cobertas)
-
-> Próximo: `go help testflag`
+> Explore: `go help testflag`
 
 ---
 
-### Bloco 13 — Faxina `go clean`
+### Bloco 13 — Limpeza `go clean`
 
-**🧹 Remover Deps Não Usadas**
 ```bash
-go mod tidy
-cat go.mod
-```
-
-Resultado: `fatih/color` removido (nunca foi importado de verdade)
-
-**💾 Cache de Build**
-```bash
-go test -short ./internal/...
+# Limpa o cache de testes (força reexecução dos testes na próxima vez)
 go clean -testcache
-go test -short ./internal/...
 ```
 
-**🔥 Nuclear Options**
+**LIMPA TUDO**
 ```bash
-go clean -cache        # objetos compilados (~recompila tudo do zero)
+# Limpa o cache de build (compilação do zero na próxima vez)
+go clean -cache
 ```
-
-> Próximo: `go help clean`
 
 ---
 
-## ⚙️ Camada 3 — Build avançado e geração
+## Camada 3 — Geração, Build avançado e Foco
 
 ### Bloco 14 — `go generate`
 
-**🎯 Automação de Geração de Código**
-- Tipos com constantes (Level: DEBUG, INFO, WARN, ERROR, FATAL)
-- Método `String()` gerado automaticamente
-- `stringer` → converte números em texto (eficiente)
+**Diretiva**
+- `//go:generate` → comando a ser rodado quando `go generate` for executado
 
-**📝 Diretiva Mágica**
-- `//go:generate` → comentário especial (não executa automaticamente)
-- `go generate` procura por diretivas e executa
-
-**🔧 Demonstração**
 ```bash
-cat pkg/entry/entry.go      # veja a diretiva //go:generate
-cat pkg/entry/level_string.go
-```
-
-**♻️ Regenerar**
-```bash
-rm pkg/entry/level_string.go
+# Fácil manutenção: novo level (TRACE)? Roda `go generate` Crie um novo tipo e execute
 go generate ./pkg/entry/
-cat pkg/entry/level_string.go
 ```
-
-**💡 Por que Importa**
-- Elimina código braçal (enum conversion)
-- Criação automatizada com `stringer`
-- Performance: mapeamento de memória, muito mais rápido que validação manual
-- Fácil manutenção: novo level (TRACE)? Roda `go generate` novamente
-
-> Próximo: `go help generate`
 
 ---
 
-### Bloco 15 — Build Tags + `-ldflags`
+### Bloco 15 — `go build -tags` e `go build -ldflags`
 
-**🎯 Customizar Build Sem Magic Strings**
-- Dois modos de output: texto e JSON (qual incluir?)
-- Injetar metadata em build time (versão, commit, timestamp)
-
-**🏷️ Build Tags (Conditional Compilation)**
-```bash
-cat internal/report/report.go        # //go:build !json
-cat internal/report/report_json.go   # //go:build json
-```
-
+**Build Tags (Compilação condicional)**
 - `//go:build json` → incluir apenas quando flag ativa
-- Compilador inclui/exclui arquivos (não if/else em tempo de execução)
 
-**🔨 Build com e sem Tag**
 ```bash
 go build -o logscope ./cmd/logscope
-./logscope -input testdata/access.log   # texto
+./logscope -input testdata/access.log  
+```
 
+```bash
 go build -tags json -o logscope-json ./cmd/logscope
-./logscope-json -input testdata/access.log  # JSON
+./logscope-json -input testdata/access.log 
 ```
 
-**💉 Injetar Metadata (ldflags)**
+**Injetar Metadados (ldflags)**
+- Injetar metadados em tempo de build (versão, commit, timestamp)
+
 ```bash
-go build -o logscope ./cmd/logscope
-./logscope -version
-go version -m ./logscope
+go build -ldflags "-X main.version=1.2.0 -X main.commit=7aa0090" -o logscope-linker ./cmd/logscope
 ```
 
-- Injeção no linker (imutável)
-
-**🔒 Versão no Binário**
 ```bash
-go build \
-  -ldflags "-X main.version=1.2.0 -X main.commit=$(git rev-parse --short HEAD)" \
-  -o logscope-linker \
-  ./cmd/logscope
-
-./logscope-linker -version
 go version -m ./logscope-linker
 ```
 
-**💡 Vantagens**
-- Versão gravada no binário (imutável, auditável)
-
-> Próximo: `go help build`
-
 ---
 
-### Bloco 16 — Cross-compilation
+### Bloco 16 — `GOOS` e `go build` para cross compilation
 
-**🎯 Compilar para Qualquer Plataforma**
-- Go compila para qualquer OS/Arch sem Docker, sem VM
-
-**🌍 Compilar Cruzado**
 ```bash
+# Compila para Windows
 GOOS=windows go build -o logscope.exe ./cmd/logscope
-ls -lh logscope.exe
-file logscope.exe
-
-GOOS=linux GOARCH=arm64 go build -o logscope-arm64 ./cmd/logscope
-ls -lh logscope-arm64
-file logscope-arm64
 ```
 
-> Próximo: `go help build`
+```bash
+# Verificar o binário gerado
+file logscope.exe
+```
 
 ---
 
-## 🔬 Camada 4 — Testing profundo e observabilidade
+## CAMADA 4 — Performance, observabilidade e... bug?
 
 ### Bloco 18 — Benchmarks
 
-**🎯 Medir Performance Real**
-- Testes garantem que código funciona
-- Benchmarks provam que **aguenta o tranco em produção**
-- Resultado do Go: 3 visões simultâneas (escala, latência, custo de memória)
-
-**⚡ Demonstração**
 ```bash
+# Rodar todos os benchmarks do parser (latência, throughput, memória)
 go test -bench=. -benchmem ./internal/parser/
 ```
 
-**📊 Interpretando Resultado** (ex: `BenchmarkParseReader-12`)
-1. **Iterações** (6032278): Go rodou 6+ milhões de vezes em 1 segundo (não é lucky guess — prova estatística)
-2. **Latência** (`193 ns/op`): 193 nanossegundos por linha processada (~1 milionésimo de segundo)
-3. **Memory** (`112 B/op, 1 allocs/op`): 112 bytes + 1 alocação = quase sem lixo pro GC
+**Interpretando Resultados** (ex: `BenchmarkParseReader-12`)
+1. **Iterações** (6032278): Go rodou 6+ milhões de vezes em 1 segundo
+2. **Latência** (`X ns/op`): X nanossegundos por linha processada
+3. **Memory** (`Y B/op, Z allocs/op`): Y bytes e Z alocações por operação
 4. **Paralelismo** (sufixo `-12`): usou todos os 12 núcleos disponíveis
 
-**🎯 Por que o Hot Path?**
-- Fatiar strings + converter datas = **hot path** (caminho quente)
-- Gargalo se lento/memory wasteful
-
-**⚙️ Comparando Estratégias**
-```bash
-go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
-```
-
-Resultado: 1 worker vs 8 workers
-- **Vitória (ns/op cai)**: paralelismo funciona
-- **Lei dos rendimentos decrescentes**: 8x workers ≠ 8x speedup (overhead de Goroutines)
-- **Troca inteligente (allocs/op)**: mais alocações = mais segurança (race-free com isolamento)
-
-> Próximo: `go help testflag`
+> Explore: `go help testflag`
 
 ---
 
-### Bloco 18.1 — Live Coding: Otimização Sênior vs Júnior
+### Bloco 18.1 — Erro Comum: Não pré-alocar memória
 
-**🎯 Demonstração Prática: De Lento para Rápido**
-
-**⚠️ Erro Comum 1: Não pré-alocar memória**
 ```bash
-# Altere: latencies: make([]time.Duration, 0, len(chunk))
-# Para:   latencies: make([]time.Duration, 0)
+# latencies: make([]time.Duration, 0, len(chunk)) para latencies: make([]time.Duration, 0)
 go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
 ```
 
-Resultado: `allocs/op` explode de 116 para milhares
 - Sem saber tamanho final, Go para o tempo TODO para pedir mais memória
-- Salva o GC de um infarto: reverta!
-
-**⚡ Otimização Real: Remover Cálculo do Hot Loop**
-```bash
-# 4 mudanças cirúrgicas:
-# 1. struct partialStats: map[string]int → map[entry.Level]int
-# 2. Criação: byLevel: make(map[entry.Level]int, 5)
-# 3. Hot Loop: p.byLevel[e.Level.String()]++ → p.byLevel[e.Level]++
-# 4. Merge: stats.ByLevel[k] += v → stats.ByLevel[k.String()] += v
-
-go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
-```
-
-Resultado: `ns/op` cai ~10%
-- Tirou conversão String do loop (centenas de milhares de iterações)
-- Jogou para merge final (apenas 5 vezes)
-- CPU clean, allocs unchanged
-
-**💡 Ganho Real**
-- 1 worker: 6.6M → 5.7M ns (~900K nanosegundos economizados)
-- Produção: bilhões de logs/dia = menos servidores = $ economizado
-
-> Próximo: `go help testflag`
 
 ---
 
