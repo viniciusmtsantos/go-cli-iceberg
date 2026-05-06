@@ -15,7 +15,7 @@ Recebe uma amostra de logs, processa e cria relatório sobre top endpoints, stat
 
 ## CAMADA 1 - Let's Go
 
-### Bloco 1.1 |  `go version`
+### `go version`
 
 _Mostrar versão do Binário Go instalada na sua máquina_
 ```bash
@@ -29,7 +29,7 @@ go version -m $(which docker)
 
 ---
 
-### Bloco 1.2 |  `go mod`   `go list`   `go get`
+### `go mod`   `go list`   `go get`
 
 _Inicializar novo módulo Go_
 ```bash
@@ -55,23 +55,18 @@ go get -u ./...
 
 ---
 
-### Bloco 1.3 |  `go test`
+### `go test`
 
 _Executar todos os testes do projeto com verbose_
 ```bash
 go test -v ./...
 ```
 
-Flag  `-short`  _Mudar comportamento padrão de execução dos testes_
-```bash
-go test -v -short ./...
-```
-
 **Explore  `go help testflag`**
 
 ---
 
-### Bloco 1.4 |  `go run`
+### `go run`
 
 **Executar meu projeto sem compilar um binário local**
 _Executar o projeto indicando o pacote main_
@@ -87,7 +82,7 @@ go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 ---
 
-### Bloco 1.5 |  `go build`   `go install`
+### `go build`   `go install`
 
 _Compilar o projeto para um binário local (sem instalar globalmente)_ 
 ```bash
@@ -106,9 +101,9 @@ go install ./cmd/logscope
 
 ## CAMADA 2 - Ambiente, Limpeza, Documentação e Qualidade
 
-### Bloco 2.1 |  `go env`
+### `go env`
+**Mapa de configuração global**
 
-**Configuração Global**
 _Configura valor global pra GOFLAGS (trimpath remove caminhos do sistema dos binários durante build)_
 ```bash
 go env -w GOFLAGS=-trimpath
@@ -128,7 +123,8 @@ go env -u GOFLAGS
 
 ---
 
-### Bloco 2.2 |  `go clean`
+### `go clean`
+**Limpador oficial**
 
 _Limpa o cache de testes (força reexecução dos testes na próxima vez)_
 ```bash
@@ -143,7 +139,8 @@ go clean -cache
 
 **Explore  `go help cache`**
 
-### Bloco 2.3 |  `go doc`
+### `go doc`
+**Documentador oficial**
 
 _Consultar documentação da **standard lib**_
 ```bash
@@ -157,10 +154,9 @@ go doc ./pkg/entry LogEntry
 
 ---
 
-### Bloco 2.4 |  `go fmt`
-
-**O atalho e o motor**
-_`go fmt` (atalho) →  `gofmt -l -w`_
+### `go fmt`
+**Seu formatador oficial do go**
+_`go fmt` (atalho) →  `gofmt -l -w [path]`_
 _`gofmt` (motor) →  `gofmt [flags] [path]`_
 
 _Listar arquivos que precisam de formatação_
@@ -177,11 +173,8 @@ go fmt ./...
 
 ---
 
-### Bloco 2.5 |  `go fix`
-
-**Quando usar**
-- Remover APIs depreciadas
-- Refatorar partes do código para padrões conhecidos
+### `go fix`
+**Refatorar dependências depreciadas e trechos do código para padrões conhecidos**
 
 _Atualizar e corrigir partes do código automaticamente_
 ```bash
@@ -193,16 +186,22 @@ go fix ./...
 
 ---
 
-### Bloco 2.6 |  `go test -cover`   `go tool cover`
-Testes passam, mas quanto do código tá coberto?
+### `go test -short`
+**Mudar comportamento padrão de execução dos testes**
+
+```bash
+go test -v -short ./...
+```
+
+### `go test -cover`  e  `go tool cover`
+**Quanto do código tá coberto?**
 
 _Informar cobertura de testes no pacote e gerar output a partir destas informações_ 
 ```bash
-go test -short -cover -coverprofile=coverage.out ./internal/parser/...
+go test -cover -coverprofile=coverage.out ./internal/parser/...
 ```
 
-**`go tool` - O canivete suíço do go.**  
-`cover -func`  _Informar cobertura de testes por função a partir do  coverage.out_
+_Informar cobertura de testes por função a partir do  coverage.out_
 ```bash
 go tool cover -func=coverage.out
 ```
@@ -218,21 +217,20 @@ go tool cover -html=coverage.out
 
 ## Camada 3 — Geração automática, Build customizado e Performance 
 
-### Bloco 3.1 |  `go generate`
+### `go generate`
+**Automatizar geração de código**
 
-**Diretiva**
-Diretiva  `//go:generate` _→ Executar comando definido quando `go generate` for executado_
+Diretiva  `//go:generate`  _→ Executar comando definido quando `go generate` for executado_
 ```bash
 go generate ./pkg/entry/
 ```
 
 ---
 
-### Bloco 3.2 |  `go build -tags`   `go build -ldflags`
-
+### `go build -tags`   `go build -ldflags`
 **Compilação condicional**
-Diretiva  `//go:build <tag>`  _→ inclui o arquivo apenas quando a tag está ativa no build_
 
+Diretiva  `//go:build <tag>`  _→ inclui o arquivo apenas quando a tag está ativa no build_
 _Padrão_
 ```bash
 go build -o logscope ./cmd/logscope
@@ -265,7 +263,8 @@ go version -m ./logscope-linker
 
 ---
 
-### Bloco 3.3 |  `go build` para cross compilation
+### `go build` para cross compilation
+**Compilação cruzada para outras plataformas**
 
 _Compilar executável para Windows_
 ```bash
@@ -280,7 +279,7 @@ file logscope.exe
 **Explore  `go help buildconstraint`**
 
 
-### Bloco 3.4 |  `go test -bench`
+### `go test -bench`
 
 _Rodar todos os benchmarks do parser (latência, throughput, memória)_
 ```bash
@@ -300,7 +299,7 @@ go test -bench=. -benchmem ./internal/parser/
 go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
 ```
 
-### Bloco 3.5 |  `go test -race`
+### `go test -race`
 
 *Temos dois processors: `ProcessSafe` (correto) e `ProcessNaive` (com bug)*
 
@@ -321,9 +320,9 @@ _O  `-race`  diz: qual variável, qual linha, quais goroutines conflitaram_
 
 ---
 
-## CAMADA 4 — Profiling, Observabilidade e... Bug?
+## CAMADA 4 — Profiling, Bug e Observabilidade
 
-### Bloco 4.2 |  `go tool pprof`
+### `go tool pprof`
 
 **Profiling — Raio-X**
 Flag  `pprof`  _→ Profiler de CPU/Memória oficial do Go_
@@ -344,7 +343,7 @@ go tool pprof -http=:8081 mem.prof
 
 ---
 
-### Bloco 4.3 |  `go bug`
+### `go bug`
 
 **Reportar Bugs para a turma da marmota**
 _Comportamento estranho da lingageum ou do toolchain? Suspeita de bug no próprio Go?_
@@ -352,6 +351,6 @@ _Comportamento estranho da lingageum ou do toolchain? Suspeita de bug no própri
 go bug
 ```
 
-### Bloco 4.4 |  `go work`
+### `go work`
 
-### Bloco 4.5 |  `go telemetry`
+### `go telemetry`
