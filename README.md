@@ -1,19 +1,18 @@
 # O Iceberg da CLI do Go
 
-## Abertura — `go help`
+## Abertura —  `go help`
 
-- `go help` → lista TUDO: comandos + tópicos conceituais do toolchain
-- `go help <command>` → execução
-- `go help <topic>` → conceitos
+- `go help` → Lista TUDO go pode oferecer: comandos + tópicos conceituais
+- `go help <command>` → Execução
+- `go help <topic>` → Conceitos
 
-- Mais que apresentação de comandos, isso é um convite a explorar
-- `go help` é seu mapa
+- Não é uma apresentação sobre comandos, isso é um convite a explorar o  `go help`.
 
 ---
 
 ## CAMADA 1 - Let's Go
 
-### Bloco 0 |  `go version`
+### Bloco 1.1 |  `go version`
 
 _Mostrar versão do Binário Go instalada na sua máquina_
 ```bash
@@ -27,15 +26,15 @@ go version -m $(which docker)
 
 ---
 
-### Bloco 1 | Logscope: Analisador de Logs HTTP
-Recebe uma amostra de logs e cria relatório sobre endpoints, status e latência a partir dela
+### Bloco 1.2 | Projeto Logscope: sandbox para os comandos do Go
+Recebe uma amostra de logs, processa e cria relatório sobre top endpoints, status de request e percentis de latência.
 
 _Executar o projeto indicando o pacote main_
 ```bash
 go run ./cmd/logscope -input testdata/access.log
 ```
 
-### Bloco 2 |  `go mod`   `go list`   `go get`
+### Bloco 1.3 |  `go mod`   `go list`   `go get`
 
 _Inicializar novo módulo Go_
 ```bash
@@ -61,7 +60,7 @@ go get -u ./...
 
 ---
 
-### Bloco 3 |  `go test`
+### Bloco 1.4 |  `go test`
 
 _Executar todos os testes do projeto com verbose_
 ```bash
@@ -78,15 +77,13 @@ Flag  `-count`  _→ Executar testes X vezes. `-count=1` é forma idiomática de
 go test -short -count=3 ./internal/...
 ```
 
----
-
 **Explore  `go help testflag`**
 
 ---
 
-### Bloco 4 |  `go run`
-
+### Bloco 1.5 |  `go run`
 **Executar uma ferramenta Go diretamente sem instalar**
+
 _Nesse exemplo, `govulncheck` pra analisar vulnerabilidades nas dependências do projeto_
 ```bash
 go run golang.org/x/vuln/cmd/govulncheck@latest ./...
@@ -94,7 +91,7 @@ go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 ---
 
-### Bloco 5 |  `go build`   `go install`
+### Bloco 1.6 |  `go build`   `go install`
 
 _Compilar o projeto para um binário local (sem instalar globalmente)_ 
 ```bash
@@ -111,59 +108,9 @@ go install ./cmd/logscope
 
 ---
 
-## CAMADA 2 - Documentação, Qualidade e Ambiente
+## CAMADA 2 - Ambiente, Limpeza, Documentação e Qualidade
 
-### Bloco 6 |  `go doc`
-
-_Consultar documentação da **standard lib**_
-```bash
-go doc fmt.Printf
-```
-
-_Consultar documentação no **seu código**_
-```bash
-go doc ./pkg/entry LogEntry
-```
-
----
-
-### Bloco 7 |  `go fmt`
-
-**O atalho e o motor**
-_`go fmt` (atalho) →  `gofmt -l -w`_
-_`gofmt` (motor) →  `gofmt [flags] [path]`_
-
-_Listar arquivos que precisam de formatação_
-```bash
-gofmt -l -d .
-```
-
-_Aplicar formatação no projeto inteiro_
-```bash
-go fmt ./...
-```
-
-**Explore  `gofmt -help`**
-
----
-
-### Bloco 8 |  `go fix`
-
-**Quando usar**
-- Remover APIs depreciadas
-- Refatorar partes do código para padrões conhecidos
-
-_Atualizar e corrigir partes do código automaticamente_
-```bash
-go fix ./... 
-```
-
-**Atenção**
-- Não vai resolver todos os problemas do seu código, mas é uma ferramenta útil
-
----
-
-### Bloco 9 |  `go env`
+### Bloco 2.1 |  `go env`
 
 **Configuração Global**
 _Configura valor global pra GOFLAGS (trimpath remove caminhos do sistema dos binários durante build)_
@@ -185,30 +132,7 @@ go env -u GOFLAGS
 
 ---
 
-### Bloco 10 |  `go test -cover`
-Testes passam, mas quanto do código tá coberto?
-
-_Informar cobertura de testes no pacote e gerar output a partir destas informações_ 
-```bash
-go test -short -cover -coverprofile=coverage.out ./internal/...
-```
-
-**`go tool` - O canivete suíço do go.**  
-`cover -func`  _Informar cobertura de testes por função a partir do output.out_
-```bash
-go tool cover -func=coverage.out
-```
-
-_Criar um HTML com visualização de cobertura a partir do output.out_
-```bash
-go tool cover -html=coverage.out
-```
-
-**Explore  `go help testfunc`**
-
----
-
-### Bloco 11 |  Limpeza  `go clean`
+### Bloco 2.2 |  `go clean`
 
 _Limpa o cache de testes (força reexecução dos testes na próxima vez)_
 ```bash
@@ -223,11 +147,82 @@ go clean -cache
 
 **Explore  `go help cache`**
 
+### Bloco 2.3 |  `go doc`
+
+_Consultar documentação da **standard lib**_
+```bash
+go doc fmt.Printf
+```
+
+_Consultar documentação no **seu código**_
+```bash
+go doc ./pkg/entry LogEntry
+```
+
 ---
 
-## Camada 3 — Geração, Build avançado e Foco
+### Bloco 2.4 |  `go fmt`
 
-### Bloco 12 |  `go generate`
+**O atalho e o motor**
+_`go fmt` (atalho) →  `gofmt -l -w`_
+_`gofmt` (motor) →  `gofmt [flags] [path]`_
+
+_Listar arquivos que precisam de formatação_
+```bash
+gofmt -l -d .
+```
+
+_Aplicar formatação no projeto inteiro_
+```bash
+go fmt ./...
+```
+
+**Explore  `gofmt -help`**
+
+---
+
+### Bloco 2.5 |  `go fix`
+
+**Quando usar**
+- Remover APIs depreciadas
+- Refatorar partes do código para padrões conhecidos
+
+_Atualizar e corrigir partes do código automaticamente_
+```bash
+go fix ./... 
+```
+
+**Atenção**
+- Não vai resolver todos os problemas do seu código, mas é uma ferramenta útil
+
+---
+
+### Bloco 2.6 |  `go test -cover`   `go tool cover`
+Testes passam, mas quanto do código tá coberto?
+
+_Informar cobertura de testes no pacote e gerar output a partir destas informações_ 
+```bash
+go test -short -cover -coverprofile=coverage.out ./internal/parser/...
+```
+
+**`go tool` - O canivete suíço do go.**  
+`cover -func`  _Informar cobertura de testes por função a partir do  coverage.out_
+```bash
+go tool cover -func=coverage.out
+```
+
+_Criar um HTML com visualização de cobertura a partir do coverage.out_
+```bash
+go tool cover -html=coverage.out
+```
+
+**Explore  `go help testfunc`**
+
+---
+
+## Camada 3 — Geração automática, Build customizado e Performance 
+
+### Bloco 3.1 |  `go generate`
 
 **Diretiva**
 Diretiva  `//go:generate` _→ Executar comando definido quando `go generate` for executado_
@@ -237,7 +232,7 @@ go generate ./pkg/entry/
 
 ---
 
-### Bloco 13 |  `go build -tags`   `go build -ldflags`
+### Bloco 3.2 |  `go build -tags`   `go build -ldflags`
 
 **Compilação condicional**
 Diretiva  `//go:build <tag>`  _→ inclui o arquivo apenas quando a tag está ativa no build_
@@ -245,7 +240,7 @@ Diretiva  `//go:build <tag>`  _→ inclui o arquivo apenas quando a tag está at
 _Padrão_
 ```bash
 go build -o logscope ./cmd/logscope
-./logscope -input testdata/access.log  
+./logscope -input testdata/access.log
 ```
 
 _Arquivo incluído e suporte ao relatorio em JSON_
@@ -255,9 +250,17 @@ go build -tags json -o logscope-json ./cmd/logscope
 ```
 
 **Injeção de metadados**
+```bash
+./logscope -version
+```
+
 Flag  `ldflags`  _→ Injetar metadados em tempo de build (versão, commit, timestamp, etc.)_
 ```bash
 go build -ldflags "-X main.version=1.2.0 -X main.commit=7aa0090" -o logscope-linker ./cmd/logscope
+```
+
+```bash
+./logscope-linker -version
 ```
 
 ```bash
@@ -266,7 +269,7 @@ go version -m ./logscope-linker
 
 ---
 
-### Bloco 14 |  `go build` com cross compilation
+### Bloco 3.3 |  `go build` para cross compilation
 
 _Compilar executável para Windows_
 ```bash
@@ -280,11 +283,8 @@ file logscope.exe
 
 **Explore  `go help buildconstraint`**
 
----
 
-## CAMADA 4 — Performance, observabilidade e... bug?
-
-### Bloco 15 | Benchmarks
+### Bloco 3.4 |  `go test -bench`
 
 _Rodar todos os benchmarks do parser (latência, throughput, memória)_
 ```bash
@@ -298,16 +298,15 @@ go test -bench=. -benchmem ./internal/parser/
 4. **Paralelismo** (sufixo `-12`): usou todos os 12 núcleos disponíveis
 
 #### Erro Comum: Não pré-alocar memória
+// TODO: Entender o que é este -run
 - Mudar: `De latencies: make([]time.Duration, 0, len(chunk))` para  `latencies: make([]time.Duration, 0)`
 ```bash
 go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
 ```
 
----
+### Bloco 3.5 |  `go test -race`
 
-### Bloco 16 |  `go test -race`
-
-- Temos dois processors: `ProcessSafe` (correto) e `ProcessNaive` (com bug)
+*Temos dois processors: `ProcessSafe` (correto) e `ProcessNaive` (com bug)*
 
 _Executar o teste para ProcessNaive_
 ```bash
@@ -326,12 +325,14 @@ _O  `-race`  diz: qual variável, qual linha, quais goroutines conflitaram_
 
 ---
 
-### Bloco 17 |  `go tool pprof`
+## CAMADA 4 — Profiling, Observabilidade e... Bug?
+
+### Bloco 4.2 |  `go tool pprof`
 
 **Profiling — Raio-X**
 Flag  `pprof`  _→ Profiler de CPU/Memória oficial do Go_
 
-**Preparação a amostragem do profiling de mCPU**
+**Preparação a amostragem do profiling de CPU**
 ```bash
 ./logscope -input testdata/access.log -cpuprofile cpu.prof
 go tool pprof -http=:8080 cpu.prof
@@ -347,7 +348,7 @@ go tool pprof -http=:8081 mem.prof
 
 ---
 
-### Bloco 18 |  `go bug`
+### Bloco 4.3 |  `go bug`
 
 **Reportar Bugs para a turma da marmota**
 _Comportamento estranho da lingageum ou do toolchain? Suspeita de bug no próprio Go?_
@@ -355,30 +356,6 @@ _Comportamento estranho da lingageum ou do toolchain? Suspeita de bug no própri
 go bug
 ```
 
-## Resumo
+### Bloco 4.4 |  `go work`
 
-| Comando | O que entrega |
-|---------|--------------|
-| `go help` | A porta de entrada para tudo no toolchain |
-| `go version -m` | Audita dependências de qualquer binário Go |
-| `go get` + `go mod tidy` | Gerencia dependências com segurança criptográfica |
-| `go run` | Executa sem compilar (dev rápido, sem artefatos) |
-| `go build` | Compila para produção (nativo, sem runtime) |
-| `go install` | Compila + instala globalmente em `$GOPATH/bin` |
-| `go doc` | Documentação offline — stdlib e seu próprio código |
-| `go fmt` | Formatação canônica — zero debate de estilo |
-| `go vet` | Bugs que o compilador não vê — inspeciona a AST |
-| `go fix` | Atualiza código automaticamente (breaking changes do Go) |
-| `go env -w` | Configuração Go persistente sem variáveis de shell |
-| `go list -m -u all` | Radar de dependências desatualizadas |
-| `go mod why` | Rastreia a origem de qualquer dep no grafo |
-| `go test -cover` | Cobertura — sabe o que está sendo testado |
-| `go clean` | Gestão cirúrgica do cache de build e módulos |
-| `go generate` | Automação de geração de código |
-| `go build -ldflags` + `-tags` | Build customizado sem magic |
-| `go test -race` | Detecta corridas de dados em tempo de execução |
-| `go test -fuzz` | Encontra bugs com entradas aleatórias |
-| `go test -shuffle` | Detecta dependências ocultas entre testes |
-| `go test -bench` | Mede performance real (latência, throughput, memória) |
-| `go tool pprof` | Profiling de CPU e memória |
-| `go bug` | Reporta bugs para a comunidade Go |
+### Bloco 4.5 |  `go telemetry`
