@@ -59,7 +59,7 @@ go get -u ./...
 
 _Executar todos os testes do projeto com verbose_
 ```bash
-go test -v ./...
+go test -v ./internal/parser
 ```
 
 **Explore  `go help testflag`**
@@ -139,6 +139,8 @@ go clean -cache
 
 **Explore  `go help cache`**
 
+---
+
 ### `go doc`
 **Documentador oficial**
 
@@ -185,13 +187,6 @@ go fix ./...
 - Não vai resolver todos os problemas do seu código, mas é uma ferramenta útil
 
 ---
-
-### `go test -short`
-**Mudar comportamento padrão de execução dos testes**
-
-```bash
-go test -v -short ./...
-```
 
 ### `go test -cover`  e  `go tool cover`
 **Quanto do código tá coberto?**
@@ -253,10 +248,7 @@ Flag  `ldflags`  _→ Injetar metadados em tempo de build (versão, commit, time
 go build -ldflags "-X main.version=1.2.0 -X main.commit=7aa0090" -o logscope-linker ./cmd/logscope
 ```
 
-```bash
-./logscope-linker -version
-```
-
+_Verificar metadados embutidos no binário_
 ```bash
 go version -m ./logscope-linker
 ```
@@ -278,6 +270,7 @@ file logscope.exe
 
 **Explore  `go help buildconstraint`**
 
+---
 
 ### `go test -bench`
 
@@ -292,48 +285,46 @@ go test -bench=. -benchmem ./internal/parser/
 3. **Memoria** (`Y B/op, Z allocs/op`): Y bytes e Z alocações por operação
 4. **Paralelismo** (sufixo `-12`): usou todos os 12 núcleos disponíveis
 
-#### Erro Comum: Não pré-alocar memória
-// TODO: Entender o que é este -run
-- Mudar: `De latencies: make([]time.Duration, 0, len(chunk))` para  `latencies: make([]time.Duration, 0)`
-```bash
-go test -run=^$ -bench=BenchmarkProcessSafe -benchmem ./internal/processor/
-```
+---
 
 ### `go test -race`
-
-*Temos dois processors: `ProcessSafe` (correto) e `ProcessNaive` (com bug)*
-
-_Executar o teste para ProcessNaive_
+_Executar o teste para `ProcessNaive` que possuí condição de corrida_
 ```bash
 go test -run TestNaiveRace ./internal/processor/
 ```
 
 Temos o erro, mas poucas informações para investigar
 
-**Com Race Detector**
-Flag  `-race`  _→ Executar o teste instrumentando cada acesso à memória_ 
+**Race detector**
+Flag  `-race`  _→ Executar o teste instrumentando cada acesso à memória e mostrando quais goroutines conflitaram_ 
 ```bash
-go test -race -run TestNaiveRace ./internal/processor/
+go test -run TestNaiveRace -race ./internal/processor/
 ```
 
-_O  `-race`  diz: qual variável, qual linha, quais goroutines conflitaram_
+---
+
+### `go test -short`
+
+**Mudar comportamento padrão de execução dos testes**
+Flag  `-short`  _→ Executar o teste de forma resumida, skipando algum teste_ 
+```bash
+go test -short ./internal/processor/
+```
 
 ---
 
 ## CAMADA 4 — Profiling, Bug e Observabilidade
 
 ### `go tool pprof`
-
-**Profiling — Raio-X**
 Flag  `pprof`  _→ Profiler de CPU/Memória oficial do Go_
 
-**Preparação a amostragem do profiling de CPU**
+**Preparação e amostragem do profiling de CPU**
 ```bash
 ./logscope -input testdata/access.log -cpuprofile cpu.prof
 go tool pprof -http=:8080 cpu.prof
 ```
 
-**Preparação a amostragem do profiling de memória**
+**Preparação e amostragem do profiling de memória**
 ```bash
 ./logscope -input testdata/access.log -memprofile mem.prof
 go tool pprof -http=:8081 mem.prof
@@ -351,6 +342,10 @@ _Comportamento estranho da lingageum ou do toolchain? Suspeita de bug no própri
 go bug
 ```
 
+---
+
 ### `go work`
+
+---
 
 ### `go telemetry`
