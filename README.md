@@ -131,7 +131,6 @@ _Limpa o cache de testes (força reexecução dos testes na próxima vez)_
 go clean -testcache
 ```
 
-**LIMPA TUDO**
 _Limpa o cache de build (compilação do zero na próxima vez)_
 ```bash
 go clean -cache
@@ -222,7 +221,7 @@ go generate ./pkg/entry/
 
 ---
 
-### `go build -tags`   `go build -ldflags`
+### `go build -tags`
 **Compilação condicional**
 
 Diretiva  `//go:build <tag>`  _→ inclui o arquivo apenas quando a tag está ativa no build_
@@ -238,11 +237,10 @@ go build -tags json -o logscope-json ./cmd/logscope
 ./logscope-json -input testdata/access.log 
 ```
 
-**Injeção de metadados**
-```bash
-./logscope -version
-```
+---
 
+### `go build -ldflags`
+**Injeção de metadados**
 Flag  `ldflags`  _→ Injetar metadados em tempo de build (versão, commit, timestamp, etc.)_
 ```bash
 go build -ldflags "-X main.version=1.2.0 -X main.commit=7aa0090" -o logscope-linker ./cmd/logscope
@@ -251,21 +249,6 @@ go build -ldflags "-X main.version=1.2.0 -X main.commit=7aa0090" -o logscope-lin
 _Verificar metadados embutidos no binário_
 ```bash
 go version -m ./logscope-linker
-```
-
----
-
-### `go build` para cross compilation
-**Compilação cruzada para outras plataformas**
-
-_Compilar executável para Windows_
-```bash
-GOOS=windows go build -o logscope.exe ./cmd/logscope
-```
-
-_Verificar o executável gerado_
-```bash
-file logscope.exe
 ```
 
 **Explore  `go help buildconstraint`**
@@ -279,7 +262,7 @@ _Rodar todos os benchmarks do parser (latência, throughput, memória)_
 go test -bench=. -benchmem ./internal/parser/
 ```
 
-**Interpretando Resultados** (ex: `BenchmarkParseReader-12`)
+**Interpretando Resultados**
 1. **Iterações** (`V`): Go rodou V milhões de vezes em 1 segundo
 2. **Latência** (`X ns/op`): X nanossegundos por linha processada
 3. **Memoria** (`Y B/op, Z allocs/op`): Y bytes e Z alocações por operação
@@ -287,13 +270,17 @@ go test -bench=. -benchmem ./internal/parser/
 
 ---
 
-### `go test -race`
-_Executar o teste para `ProcessNaive` que possuí condição de corrida_
+### `go test -run`
+_Executar um teste específico_
 ```bash
 go test -run TestNaiveRace ./internal/processor/
 ```
 
 Temos o erro, mas poucas informações para investigar
+
+---
+
+### `go test -race`
 
 **Race detector**
 Flag  `-race`  _→ Executar o teste instrumentando cada acesso à memória e mostrando quais goroutines conflitaram_ 
@@ -308,7 +295,7 @@ go test -run TestNaiveRace -race ./internal/processor/
 **Mudar comportamento padrão de execução dos testes**
 Flag  `-short`  _→ Executar o teste de forma resumida, skipando algum teste_ 
 ```bash
-go test -short ./internal/processor/
+go test -run TestNaiveRace -short ./internal/processor/
 ```
 
 ---
@@ -319,18 +306,20 @@ go test -short ./internal/processor/
 Flag  `pprof`  _→ Profiler de CPU/Memória oficial do Go_
 
 **Preparação e amostragem do profiling de CPU**
+_Registra onde o processador passou o tempo enquanto sua aplicação rodava._
 ```bash
 ./logscope -input testdata/access.log -cpuprofile cpu.prof
 go tool pprof -http=:8080 cpu.prof
 ```
 
 **Preparação e amostragem do profiling de memória**
+_Registra quem alocou memória, quanto e onde no código._
 ```bash
 ./logscope -input testdata/access.log -memprofile mem.prof
 go tool pprof -http=:8081 mem.prof
 ```
 
-**Explore  `go help tool`**
+**Explore  `go tool pprof -help`**
 
 ---
 
