@@ -6,8 +6,6 @@
 - `go help <command>` → Execução
 - `go help <topic>` → Conceitos
 
-- Não é uma apresentação sobre comandos, isso é um convite a explorar o  `go help`.
-
 ---
 
 ### Projeto Logscope: Nosso Playground
@@ -22,9 +20,9 @@ _Mostrar versão do Binário Go instalada na sua máquina_
 go version
 ```
 
-Flag  `-m`  _Extrair metadados embutidos no executável analisado pra mostrar informações de compilação_
+`version -m`  _Informar metadados embutidos no binário durante a compilação_
 ```bash
-go version -m $(which docker)
+go version -m /usr/bin/docker
 ```
 
 ---
@@ -80,6 +78,8 @@ _`govulncheck`  analisa vulnerabilidades nas dependências do projeto_
 go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 ```
 
+**Explore  `go help packages`**
+
 ---
 
 ### `go build`   `go install`
@@ -87,6 +87,10 @@ go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 _Compilar o projeto para um binário local (sem instalar globalmente)_ 
 ```bash
 go build ./cmd/logscope
+```
+
+_Executar o binário gerado_
+```bash
 ./logscope -input testdata/access.log
 ```
 
@@ -227,13 +231,15 @@ go generate ./pkg/entry/
 Diretiva  `//go:build <tag>`  _→ inclui o arquivo apenas quando a tag está ativa no build_
 _Padrão_
 ```bash
-go build -o logscope ./cmd/logscope
 ./logscope -input testdata/access.log
 ```
 
 _Arquivo incluído e suporte ao relatorio em JSON_
 ```bash
 go build -tags json -o logscope-json ./cmd/logscope
+```
+
+```bash
 ./logscope-json -input testdata/access.log 
 ```
 
@@ -273,7 +279,7 @@ go test -bench=. -benchmem ./internal/parser/
 ### `go test -run`
 _Executar um teste específico_
 ```bash
-go test -run TestNaiveRace ./internal/processor/
+go test -run TestNaiveRace -v ./internal/processor/
 ```
 
 Temos o erro, mas poucas informações para investigar
@@ -295,7 +301,7 @@ go test -run TestNaiveRace -race ./internal/processor/
 **Mudar comportamento padrão de execução dos testes**
 Flag  `-short`  _→ Executar o teste de forma resumida, skipando algum teste_ 
 ```bash
-go test -run TestNaiveRace -short ./internal/processor/
+go test -run TestNaiveRace -v -short ./internal/processor/
 ```
 
 ---
@@ -334,7 +340,23 @@ go bug
 ---
 
 ### `go work`
+**Trabalhar com múltiplos módulos Go locais simultaneamente sem precisar publicá-los.**
+_Inicializar um workspace Go no diretório atual_
+```bash
+go work init .
+```
 
 ---
 
 ### `go telemetry`
+**Gerencia o envio de dados de uso e erros das ferramentas Go para os times do Go.**
+
+_Ver o status atual de telemetria_
+```bash
+go telemetry
+```
+
+_Coleta os dados normalmente, mas não envia nada_
+```bash
+go telemetry local
+```
