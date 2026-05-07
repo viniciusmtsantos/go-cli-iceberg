@@ -49,7 +49,7 @@ _Atualizar todas as dependências para a última versão disponível. Atenção 
 go get -u ./...
 ```
 
-**Explore  `go help modules`**
+**Explore  `go help go.mod`**
 
 ---
 
@@ -345,6 +345,8 @@ _Inicializar um workspace Go no diretório atual_
 ```bash
 go work init .
 ```
+
+**Explore  `go help modules`**
 
 ---
 
