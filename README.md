@@ -8,7 +8,7 @@
 
 ---
 
-### Projeto Logscope: Nosso Playground
+## Projeto Logscope: Nosso Playground
 Recebe uma amostra de logs, processa e cria relatório sobre top endpoints, status de request e percentis de latência.
 
 ## CAMADA 1 - Let's Go
